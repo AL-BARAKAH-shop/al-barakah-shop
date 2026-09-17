@@ -2142,47 +2142,168 @@ initHeroSlider();
 
 })();
 
-
 // =====================================================
-// AL-BARAKAH MOBILE KEYBOARD / POPUP FIX
-// Keyboard open হলে input/textarea যেন নিচে লুকিয়ে না যায়
+// AL-BARAKAH UNIVERSAL MOBILE KEYBOARD FIX
+// Chrome + Facebook In-App Browser + Android WebView
 // =====================================================
 
 (function(){
 
-  function keepInputVisible(){
+  let initialHeight = window.innerHeight;
+  let keyboardOpen = false;
+
+  function getActiveField(){
 
     const el = document.activeElement;
 
-    if(!el) return;
+    if(!el) return null;
 
-    const isInput =
+    if(
       el.tagName === "INPUT" ||
       el.tagName === "TEXTAREA" ||
-      el.tagName === "SELECT";
+      el.tagName === "SELECT"
+    ){
+      return el;
+    }
 
-    if(!isInput) return;
+    return null;
+  }
 
-    // Keyboard ওপেন হওয়ার পর browser-কে একটু সময় দেওয়া
+
+  function isKeyboardOpen(){
+
+    let currentHeight = window.innerHeight;
+
+    // visualViewport থাকলে সেটার height ব্যবহার
+    if(window.visualViewport){
+      currentHeight = Math.min(
+        window.innerHeight,
+        window.visualViewport.height
+      );
+    }
+
+    return (
+      initialHeight - currentHeight > 120
+    );
+  }
+
+
+  function findOpenPopup(){
+
+    const ids = [
+      "checkoutOverlay",
+      "cartOverlay",
+      "productModal",
+      "businessOverlay",
+      "businessFormOverlay"
+    ];
+
+    for(let i=0;i<ids.length;i++){
+
+      const el=document.getElementById(ids[i]);
+
+      if(
+        el &&
+        el.classList.contains("show")
+      ){
+        return el;
+      }
+
+    }
+
+    return null;
+  }
+
+
+  function moveFieldAboveKeyboard(){
+
+    const field = getActiveField();
+
+    if(!field) return;
+
+    const popup = findOpenPopup();
+
     setTimeout(function(){
 
-      el.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "nearest"
-      });
+      // -----------------------------------------
+      // প্রথম চেষ্টা: scrollIntoView
+      // -----------------------------------------
 
-    }, 250);
+      try{
+
+        field.scrollIntoView({
+          behavior:"smooth",
+          block:"center",
+          inline:"nearest"
+        });
+
+      }catch(err){}
+
+
+      // -----------------------------------------
+      // দ্বিতীয় চেষ্টা: popup-এর ভিতরে scroll
+      // Facebook WebView-এর জন্য গুরুত্বপূর্ণ
+      // -----------------------------------------
+
+      if(popup){
+
+        setTimeout(function(){
+
+          try{
+
+            const fieldRect =
+              field.getBoundingClientRect();
+
+            const popupRect =
+              popup.getBoundingClientRect();
+
+            const viewportHeight =
+              window.visualViewport
+                ? window.visualViewport.height
+                : window.innerHeight;
+
+            // Keyboard-এর উপরের নিরাপদ জায়গা
+            const safeBottom =
+              viewportHeight - 30;
+
+            // Field নিচে চলে গেলে
+            if(fieldRect.bottom > safeBottom){
+
+              const difference =
+                fieldRect.bottom - safeBottom;
+
+              popup.scrollTop += difference + 30;
+
+            }
+
+            // Field popup-এর উপরের বাইরে চলে গেলে
+            if(fieldRect.top < popupRect.top){
+
+              popup.scrollTop -=
+                (popupRect.top - fieldRect.top) + 20;
+
+            }
+
+          }catch(err){}
+
+        },150);
+
+      }
+
+    },250);
 
   }
 
 
-  // Input/textarea/select-এ focus হলে
+  // =================================================
+  // INPUT / TEXTAREA FOCUS
+  // =================================================
+
   document.addEventListener(
     "focusin",
     function(e){
 
-      const el = e.target;
+      const el=e.target;
 
       if(
         el.tagName === "INPUT" ||
@@ -2190,7 +2311,96 @@ initHeroSlider();
         el.tagName === "SELECT"
       ){
 
-        keepInputVisible();
+        setTimeout(function(){
+
+          moveFieldAboveKeyboard();
+
+        },200);
+
+        setTimeout(function(){
+
+          moveFieldAboveKeyboard();
+
+        },600);
+
+        setTimeout(function(){
+
+          moveFieldAboveKeyboard();
+
+        },1000);
+
+      }
+
+    },
+    true
+  );
+
+
+  // =================================================
+  // VISUAL VIEWPORT
+  // Chrome + newer WebView
+  // =================================================
+
+  if(window.visualViewport){
+
+    window.visualViewport.addEventListener(
+      "resize",
+      function(){
+
+        if(isKeyboardOpen()){
+
+          keyboardOpen=true;
+
+          moveFieldAboveKeyboard();
+
+        }else{
+
+          keyboardOpen=false;
+
+        }
+
+      }
+    );
+
+
+    window.visualViewport.addEventListener(
+      "scroll",
+      function(){
+
+        if(keyboardOpen){
+
+          moveFieldAboveKeyboard();
+
+        }
+
+      }
+    );
+
+  }
+
+
+  // =================================================
+  // WINDOW RESIZE
+  // Facebook In-App Browser fallback
+  // =================================================
+
+  window.addEventListener(
+    "resize",
+    function(){
+
+      if(isKeyboardOpen()){
+
+        keyboardOpen=true;
+
+        setTimeout(function(){
+
+          moveFieldAboveKeyboard();
+
+        },100);
+
+      }else{
+
+        keyboardOpen=false;
 
       }
 
@@ -2198,30 +2408,40 @@ initHeroSlider();
   );
 
 
-  // Mobile keyboard-এর কারণে viewport পরিবর্তন হলে
-  if(window.visualViewport){
+  // =================================================
+  // PAGE LOAD HEIGHT
+  // =================================================
 
-    let lastHeight = window.visualViewport.height;
+  window.addEventListener(
+    "load",
+    function(){
 
-    window.visualViewport.addEventListener(
-      "resize",
-      function(){
+      setTimeout(function(){
 
-        const currentHeight =
-          window.visualViewport.height;
+        initialHeight=window.innerHeight;
 
-        // Viewport ছোট হয়েছে = keyboard সম্ভবত ওপেন
-        if(currentHeight < lastHeight - 100){
+      },500);
 
-          keepInputVisible();
+    }
+  );
 
-        }
 
-        lastHeight = currentHeight;
+  // =================================================
+  // ORIENTATION CHANGE
+  // =================================================
 
-      }
-    );
+  window.addEventListener(
+    "orientationchange",
+    function(){
 
-  }
+      setTimeout(function(){
+
+        initialHeight=window.innerHeight;
+
+      },500);
+
+    }
+  );
+
 
 })();
