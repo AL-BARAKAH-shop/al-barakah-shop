@@ -1032,3 +1032,290 @@ body.modal-open{overflow:hidden}
   }
 
 }
+
+
+
+/* =====================================================
+   AL-BARAKAH MOBILE HEADER FIX
+   Small Mobile + Facebook In-App Browser
+   ===================================================== */
+
+@media (max-width: 650px){
+
+  /* Header পুরো width ব্যবহার করবে */
+  header,
+  .header,
+  .site-header{
+    width:100%;
+    box-sizing:border-box;
+  }
+
+
+  /* Header-এর ভিতরের main container */
+  header .container,
+  .header .container,
+  .site-header .container,
+  .nav-container{
+
+    width:100%;
+    max-width:none;
+    padding-left:10px;
+    padding-right:10px;
+    box-sizing:border-box;
+
+  }
+
+
+  /* Header layout */
+  header .container,
+  .header .container,
+  .site-header .container,
+  .nav-container{
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+
+  }
+
+
+  /* =================================================
+     AL-BARAKAH BRAND
+     ================================================= */
+
+  .brand,
+  .logo,
+  .brand-logo,
+  .site-brand{
+
+    flex:0 1 auto;
+    min-width:0;
+
+  }
+
+
+  .brand a,
+  .logo a,
+  .brand-logo a,
+  .site-brand a{
+
+    display:flex;
+    align-items:center;
+    min-width:0;
+    white-space:nowrap;
+
+  }
+
+
+  .brand img,
+  .logo img,
+  .brand-logo img,
+  .site-brand img{
+
+    max-width:42px;
+    height:auto;
+    flex-shrink:0;
+
+  }
+
+
+  .brand h1,
+  .brand h2,
+  .logo h1,
+  .logo h2,
+  .brand-logo h1,
+  .brand-logo h2,
+  .site-brand h1,
+  .site-brand h2{
+
+    font-size:16px;
+    margin:0;
+    white-space:nowrap;
+
+  }
+
+
+  /* =================================================
+     NAVIGATION
+     ================================================= */
+
+  nav,
+  .nav,
+  .main-nav{
+
+    display:flex;
+    align-items:center;
+    flex:1 1 auto;
+    min-width:0;
+    overflow:hidden;
+
+  }
+
+
+  nav ul,
+  .nav ul,
+  .main-nav ul{
+
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+
+    gap:4px;
+
+    margin:0;
+    padding:0;
+
+    list-style:none;
+
+    width:100%;
+
+    overflow:hidden;
+
+  }
+
+
+  nav li,
+  .nav li,
+  .main-nav li{
+
+    flex:0 0 auto;
+
+  }
+
+
+  nav a,
+  .nav a,
+  .main-nav a{
+
+    display:block;
+
+    padding:6px 5px;
+
+    font-size:12px;
+
+    white-space:nowrap;
+
+    text-decoration:none;
+
+  }
+
+
+  /* =================================================
+     CART BUTTON
+     ================================================= */
+
+  #cartBtn,
+  .cart-btn,
+  .cart-button{
+
+    flex:0 0 auto;
+
+    margin-left:4px;
+
+    min-width:42px;
+    width:auto;
+
+    padding:7px 9px;
+
+    white-space:nowrap;
+
+    position:relative;
+
+    z-index:5;
+
+  }
+
+
+  #cartCount,
+  .cart-count{
+
+    min-width:16px;
+    height:16px;
+
+    font-size:10px;
+
+    line-height:16px;
+
+  }
+
+}
+
+
+/* =====================================================
+   VERY SMALL MOBILE
+   360px / 320px
+   ===================================================== */
+
+@media (max-width:380px){
+
+  header .container,
+  .header .container,
+  .site-header .container,
+  .nav-container{
+
+    padding-left:7px;
+    padding-right:7px;
+
+    gap:5px;
+
+  }
+
+
+  .brand img,
+  .logo img,
+  .brand-logo img,
+  .site-brand img{
+
+    max-width:36px;
+
+  }
+
+
+  .brand h1,
+  .brand h2,
+  .logo h1,
+  .logo h2,
+  .brand-logo h1,
+  .brand-logo h2,
+  .site-brand h1,
+  .site-brand h2{
+
+    font-size:14px;
+
+  }
+
+
+  nav ul,
+  .nav ul,
+  .main-nav ul{
+
+    gap:1px;
+
+  }
+
+
+  nav a,
+  .nav a,
+  .main-nav a{
+
+    padding:5px 3px;
+
+    font-size:10px;
+
+  }
+
+
+  #cartBtn,
+  .cart-btn,
+  .cart-button{
+
+    padding:6px 7px;
+
+    min-width:38px;
+
+    margin-left:2px;
+
+  }
+
+}
