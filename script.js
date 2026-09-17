@@ -1151,12 +1151,300 @@ function scrollActiveCategoryIntoView(){
   }
 }
 function categories(){
-  const el=document.getElementById("categories");
-  if(!el)return;
-  let a=["সব",...new Set(products.map(x=>x.cat))];
-  el.innerHTML=a.map(x=>`<button class="cat ${x===active?'active':''}" onclick="setCat('${x}')">${x}</button>`).join("");
-  ensureStickyCategory();
-  requestAnimationFrame(scrollActiveCategoryIntoView);
+
+  const original = document.getElementById("categories");
+
+  if(!original) return;
+
+
+  // =====================================================
+  // CATEGORY OUTSIDE ARROW WRAPPER
+  // =====================================================
+
+  let shell = original.parentElement;
+
+  if(!shell || !shell.classList.contains("category-scroll-shell")){
+
+    shell = document.createElement("div");
+
+    shell.className = "category-scroll-shell";
+
+    original.parentNode.insertBefore(
+      shell,
+      original
+    );
+
+    shell.appendChild(original);
+
+
+    // -------------------------------------------------
+    // Right fade - scroll area-এর বাইরে
+    // -------------------------------------------------
+
+    const fade = document.createElement("div");
+
+    fade.className = "category-scroll-fade";
+
+    fade.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    shell.appendChild(fade);
+
+
+    // -------------------------------------------------
+    // Arrow - IMPORTANT
+    // এটা #categories-এর ভিতরে নয়
+    // shell-এর আলাদা element
+    // -------------------------------------------------
+
+    const arrow = document.createElement("div");
+
+    arrow.className =
+      "category-scroll-arrow";
+
+    arrow.innerHTML = "›";
+
+    arrow.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    shell.appendChild(arrow);
+
+
+    // -------------------------------------------------
+    // First time swipe hint
+    // -------------------------------------------------
+
+    const hint = document.createElement("div");
+
+    hint.className =
+      "category-scroll-hint";
+
+    hint.innerHTML =
+      '<span class="hint-hand">👉</span>' +
+      '<span>আরও ক্যাটাগরি দেখতে ডানে সোয়াইপ করুন</span>' +
+      '<span class="hint-arrow">→</span>';
+
+    shell.appendChild(hint);
+
+
+    // =================================================
+    // CATEGORY INDICATOR UPDATE
+    // =================================================
+
+    const updateIndicator = () => {
+
+      const max =
+        Math.max(
+          0,
+          original.scrollWidth -
+          original.clientWidth
+        );
+
+      const hasOverflow = max > 4;
+
+      shell.classList.toggle(
+        "has-overflow",
+        hasOverflow
+      );
+
+      shell.classList.toggle(
+        "no-overflow",
+        !hasOverflow
+      );
+
+
+      // Category-এর আর scroll করার জায়গা না থাকলে
+      // Arrow পুরোপুরি বন্ধ
+      if(!hasOverflow){
+
+        arrow.classList.remove("show");
+
+        return;
+      }
+
+
+      // একদম ডান পাশে পৌঁছে গেলে Arrow বন্ধ
+      const atEnd =
+        original.scrollLeft >= max - 3;
+
+      arrow.classList.toggle(
+        "show",
+        !atEnd
+      );
+
+    };
+
+
+    // =================================================
+    // USER CATEGORY SCROLL
+    // =================================================
+
+    original.addEventListener(
+      "scroll",
+      () => {
+
+        updateIndicator();
+
+        // User swipe শুরু করলে hint বন্ধ
+        if(original.scrollLeft > 5){
+
+          hint.classList.remove("show");
+
+        }
+
+      },
+      {
+        passive:true
+      }
+    );
+
+
+    // Screen resize হলে indicator update
+    window.addEventListener(
+      "resize",
+      updateIndicator,
+      {
+        passive:true
+      }
+    );
+
+
+    // =================================================
+    // FIRST TIME CATEGORY VIEW HINT
+    // =================================================
+
+    if(window.IntersectionObserver){
+
+      const observer =
+        new IntersectionObserver(
+          entries => {
+
+            if(!entries[0].isIntersecting){
+              return;
+            }
+
+
+            if(
+              window.innerWidth <= 650 &&
+              localStorage.getItem(
+                "albarakah_category_swipe_hint_seen"
+              ) !== "1"
+            ){
+
+              hint.classList.add("show");
+
+
+              // User একবার Hint দেখে ফেলেছে
+              localStorage.setItem(
+                "albarakah_category_swipe_hint_seen",
+                "1"
+              );
+
+
+              // ৩ সেকেন্ড পরে Hint চলে যাবে
+              setTimeout(
+                () => {
+
+                  hint.classList.remove(
+                    "show"
+                  );
+
+                },
+                3000
+              );
+
+            }
+
+
+            observer.disconnect();
+
+          },
+          {
+            threshold:0.35
+          }
+        );
+
+
+      observer.observe(shell);
+
+    }
+
+
+    // প্রথমবার indicator update
+    requestAnimationFrame(
+      updateIndicator
+    );
+
+  }
+
+
+  // =====================================================
+  // CATEGORY BUTTON GENERATE
+  // =====================================================
+
+  const categoryList = [
+    "সব",
+    ...new Set(
+      products.map(x => x.cat)
+    )
+  ];
+
+
+  original.innerHTML =
+    categoryList.map(
+      x =>
+        `<button class="cat ${
+          x === active ? "active" : ""
+        }"
+        onclick="setCat('${x}')">
+          ${x}
+        </button>`
+    ).join("");
+
+
+  // =====================================================
+  // MOBILE INITIAL POSITION
+  // =====================================================
+
+  if(window.innerWidth <= 650){
+
+    requestAnimationFrame(() => {
+
+      // সবসময় প্রথমে বাম দিক থেকে শুরু হবে
+      original.scrollLeft = 0;
+
+
+      const arrow =
+        shell.querySelector(
+          ".category-scroll-arrow"
+        );
+
+
+      if(arrow){
+
+        const max =
+          Math.max(
+            0,
+            original.scrollWidth -
+            original.clientWidth
+          );
+
+
+        arrow.classList.toggle(
+          "show",
+          max > 4
+        );
+
+      }
+
+    });
+
+  }
+
 }
 function setCat(x){active=x;categories();renderProducts()}
 function isStockOut(p){
