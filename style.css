@@ -981,3 +981,54 @@ body.modal-open{overflow:hidden}
     bottom:-40px;
   }
 }
+
+
+
+/* =====================================================
+   AL-BARAKAH MOBILE KEYBOARD SAFE MODAL
+   Chrome + Facebook In-App Browser + Android WebView
+   ===================================================== */
+
+@media (max-width:650px){
+
+  #checkoutOverlay,
+  #cartOverlay,
+  #productModal,
+  #businessOverlay,
+  #businessFormOverlay{
+
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+
+  }
+
+
+  #checkoutOverlay .modal,
+  #cartOverlay .modal,
+  #productModal .modal,
+  #businessOverlay .modal,
+  #businessFormOverlay .modal{
+
+    max-height:none;
+    min-height:0;
+
+  }
+
+
+  #checkoutOverlay input,
+  #checkoutOverlay textarea,
+  #checkoutOverlay select,
+  #businessOverlay input,
+  #businessOverlay textarea,
+  #businessOverlay select,
+  #businessFormOverlay input,
+  #businessFormOverlay textarea,
+  #businessFormOverlay select{
+
+    scroll-margin-top:30px;
+    scroll-margin-bottom:180px;
+
+  }
+
+}
