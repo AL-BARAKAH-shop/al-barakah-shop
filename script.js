@@ -2141,3 +2141,87 @@ initHeroSlider();
   }
 
 })();
+
+
+// =====================================================
+// AL-BARAKAH MOBILE KEYBOARD / POPUP FIX
+// Keyboard open হলে input/textarea যেন নিচে লুকিয়ে না যায়
+// =====================================================
+
+(function(){
+
+  function keepInputVisible(){
+
+    const el = document.activeElement;
+
+    if(!el) return;
+
+    const isInput =
+      el.tagName === "INPUT" ||
+      el.tagName === "TEXTAREA" ||
+      el.tagName === "SELECT";
+
+    if(!isInput) return;
+
+    // Keyboard ওপেন হওয়ার পর browser-কে একটু সময় দেওয়া
+    setTimeout(function(){
+
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "nearest"
+      });
+
+    }, 250);
+
+  }
+
+
+  // Input/textarea/select-এ focus হলে
+  document.addEventListener(
+    "focusin",
+    function(e){
+
+      const el = e.target;
+
+      if(
+        el.tagName === "INPUT" ||
+        el.tagName === "TEXTAREA" ||
+        el.tagName === "SELECT"
+      ){
+
+        keepInputVisible();
+
+      }
+
+    }
+  );
+
+
+  // Mobile keyboard-এর কারণে viewport পরিবর্তন হলে
+  if(window.visualViewport){
+
+    let lastHeight = window.visualViewport.height;
+
+    window.visualViewport.addEventListener(
+      "resize",
+      function(){
+
+        const currentHeight =
+          window.visualViewport.height;
+
+        // Viewport ছোট হয়েছে = keyboard সম্ভবত ওপেন
+        if(currentHeight < lastHeight - 100){
+
+          keepInputVisible();
+
+        }
+
+        lastHeight = currentHeight;
+
+      }
+    );
+
+  }
+
+})();
