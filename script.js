@@ -1128,11 +1128,26 @@ function ensureStickyCategory(){
   el.classList.add("alba-sticky-category");
 }
 function scrollActiveCategoryIntoView(){
-  const el=document.getElementById("categories");
-  if(!el)return;
-  const activeBtn=el.querySelector(".cat.active");
-  if(activeBtn){
-    activeBtn.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
+  const el = document.getElementById("categories");
+
+  if(!el) return;
+
+  /*
+   * Mobile-এ category কখনো automatically center হবে না।
+   * সবসময় প্রথমে "সব" category থেকেই শুরু হবে।
+   */
+
+  if(window.innerWidth <= 650){
+
+    requestAnimationFrame(() => {
+
+      el.scrollTo({
+        left: 0,
+        behavior: "instant"
+      });
+
+    });
+
   }
 }
 function categories(){
@@ -1727,6 +1742,72 @@ initHeroSlider();
   } else {
 
     initCategorySwipeHint();
+
+  }
+
+})();
+
+
+// =====================================================
+// AL-BARAKAH SMART CATEGORY SWIPE INDICATOR
+// User swipe করলে hint permanently hide
+// =====================================================
+
+(function(){
+
+  function initSmartCategory(){
+
+    const categories =
+      document.getElementById("categories");
+
+    const hint =
+      document.getElementById("albaCategorySwipeHint");
+
+    if(!categories) return;
+
+    let hasInteracted = false;
+
+    categories.addEventListener(
+      "scroll",
+      function(){
+
+        if(hasInteracted) return;
+
+        hasInteracted = true;
+
+        if(hint){
+
+          hint.classList.remove("show");
+
+          setTimeout(function(){
+
+            if(hint && hint.parentNode){
+              hint.remove();
+            }
+
+          },350);
+
+        }
+
+      },
+      {
+        passive:true
+      }
+    );
+
+  }
+
+
+  if(document.readyState === "loading"){
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initSmartCategory
+    );
+
+  }else{
+
+    initSmartCategory();
 
   }
 
