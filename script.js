@@ -342,7 +342,7 @@ const products=[
   },
   {
     id:8,
-	//stock:false,
+	stock:false,
     name:"সূর্যমুখী — PVC Wall Lamp",
     cat:"ওয়াল ল্যাম্প",
     price:650,
@@ -437,7 +437,7 @@ const products=[
   },
   {
     id:13,
-	//stock:false,
+	stock:false,
     name:"টিউলিপ ফুল — PVC Wall Lamp",
     cat:"ওয়াল ল্যাম্প",
     price:650,
@@ -494,7 +494,7 @@ const products=[
   },
   {
     id:16,
-	//stock:false,
+	stock:false,
     name:"বাশ-পাতা — PVC Wall Lamp",
     cat:"ওয়াল ল্যাম্প",
     price:650,
@@ -608,7 +608,7 @@ const products=[
   },
   {
     id:22,
-	//stock:false,
+	stock:false,
     name:"গ্রামীণ পরিবেশ, ঘর ও গাছ PVC টেবিল ল্যাম্প — Black & Silver",
     cat:"টেবিল ল্যাম্প",
     price:720,
@@ -646,7 +646,7 @@ const products=[
   },
   {
     id:24,
-	//stock:false,
+	stock:false,
     name:"মুহাম্মদ ﷺ লেখা PVC টেবিল ল্যাম্প — Black & Gold",
     cat:"টেবিল ল্যাম্প",
     price:780,
@@ -684,7 +684,7 @@ const products=[
   },
   {
     id:26,
-	//stock:false,
+	stock:false,
     name:"মুহাম্মদ ﷺ লেখা PVC টেবিল ল্যাম্প — Design-2 Black & Silver",
     cat:"টেবিল ল্যাম্প",
     price:780,
@@ -703,7 +703,7 @@ const products=[
   },
   {
     id:27,
-	//stock:false,
+	stock:false,
     name:"টিউলিপ ফুল PVC টেবিল ল্যাম্প — Black & Silver",
     cat:"টেবিল ল্যাম্প",
     price:720,
@@ -722,7 +722,7 @@ const products=[
   },
   {
     id:28,
-	//stock:false,
+	stock:false,
     name:"আল্লাহু লেখা PVC টেবিল ল্যাম্প — Design-2 Black & Silver",
     cat:"টেবিল ল্যাম্প",
     price:725,
@@ -741,7 +741,7 @@ const products=[
   },
   {
     id:29,
-	//stock:false,
+	stock:false,
     name:"আল্লাহু লেখা PVC টেবিল ল্যাম্প — Design-3 Black & Silver",
     cat:"টেবিল ল্যাম্প",
     price:720,
