@@ -1565,7 +1565,7 @@ function orderNow(id){
 function total(){
   return cart.reduce((s,x)=>{
     let p=products.find(p=>p.id===x.id);
-    return s+(p?p.price*x.qty:0);
+    return s+(p?currentPrice(p)*x.qty:0);
   },0);
 }
 function change(id,d){let x=cart.find(a=>a.id===id);if(!x)return;x.qty+=d;if(x.qty<1)cart=cart.filter(a=>a.id!==id);save();renderCart();renderCheckout()}
