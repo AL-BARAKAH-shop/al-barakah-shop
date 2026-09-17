@@ -1180,10 +1180,15 @@ function renderProducts(){
   }).join("")||"<p>কোনো পণ্য পাওয়া যায়নি।</p>"
 }
 function openProduct(id){
-  currentProduct=products.find(x=>x.id===id);currentImage=0;if(!currentProduct)return;
+  currentProduct=products.find(x=>x.id===id);
+  currentImage=0;
+  if(!currentProduct)return;
+
   document.getElementById("productModal").classList.add("show");
   renderProductModal();
   document.body.classList.add("modal-open");
+
+  albaOpenOverlay("product");
 }
 function closeProduct(e){if(!e||e.target.id==="productModal"){document.getElementById("productModal").classList.remove("show");document.body.classList.remove("modal-open")}}
 function renderProductModal(){
@@ -1202,14 +1207,53 @@ function selectProductImage(i){currentImage=i;renderProductModal()}
 function nextProductImage(){if(!currentProduct)return;currentImage=(currentImage+1)%currentProduct.images.length;renderProductModal()}
 function prevProductImage(){if(!currentProduct)return;currentImage=(currentImage-1+currentProduct.images.length)%currentProduct.images.length;renderProductModal()}
 function add(id){const p=products.find(a=>a.id===id);if(!p||isStockOut(p))return;let x=cart.find(a=>a.id===id);if(x)x.qty++;else cart.push({id,qty:1});save();renderCart();openCart()}
-function orderNow(id){const p=products.find(a=>a.id===id);if(!p||isStockOut(p))return;let x=cart.find(a=>a.id===id);if(x)x.qty++;else cart.push({id,qty:1});save();renderCart();closeProduct();openCart()}
+function orderNow(id){
+  let p=products.find(a=>a.id===id);
+
+  if(!isInStock(p)){
+    alert("এই পণ্যটি বর্তমানে Stock Out।");
+    return;
+  }
+
+  let x=cart.find(a=>a.id===id);
+
+  if(x)x.qty++;
+  else cart.push({id,qty:1});
+
+  save();
+  renderCart();
+
+  document.getElementById("productModal").classList.remove("show");
+  document.body.classList.remove("modal-open");
+
+  openCart();
+}
 function total(){return cart.reduce((s,x)=>{let p=products.find(p=>p.id===x.id);return s+(p?currentPrice(p)*x.qty:0)},0)}
 function change(id,d){let x=cart.find(a=>a.id===id);if(!x)return;x.qty+=d;if(x.qty<1)cart=cart.filter(a=>a.id!==id);save();renderCart();renderCheckout()}
 function renderCart(){let e=document.getElementById("cartItems");if(!cart.length){e.innerHTML="<p style='color:#888'>কার্ট খালি।</p>";document.getElementById("cartTotal").textContent=money(0);return}e.innerHTML=cart.map(x=>{let p=products.find(a=>a.id===x.id);if(!p)return "";return `<div class="cart-row"><div class="thumb"><img src="${p.img}"></div><div><h4>${p.name}</h4><small>${money(currentPrice(p))}</small><div class="qty"><button onclick="change(${p.id},-1)">−</button><b>${x.qty}</b><button onclick="change(${p.id},1)">+</button></div></div><button class="remove" onclick="removeItem(${p.id})">✕</button></div>`}).join("");document.getElementById("cartTotal").textContent=money(total())}
 function removeItem(id){cart=cart.filter(x=>x.id!==id);save();renderCart();renderCheckout()}
-function openCart(){document.getElementById("cartOverlay").classList.add("show");renderCart()}
+function openCart(){
+  document.getElementById("cartOverlay").classList.add("show");
+  renderCart();
+
+  albaOpenOverlay("cart");
+}
 function closeCart(e){if(!e||e.target.id==="cartOverlay")document.getElementById("cartOverlay").classList.remove("show")}
-function openCheckout(){if(!cart.length){alert("আগে একটি পণ্য কার্টে যোগ করুন।");return}document.getElementById("cartOverlay").classList.remove("show");document.getElementById("checkoutOverlay").classList.add("show");renderCheckout()}
+function openCheckout(){
+  cart=cart.filter(x=>isInStock(products.find(p=>p.id===x.id)));
+  save();
+
+  if(!cart.length){
+    alert("আগে একটি পণ্য কার্টে যোগ করুন।");
+    return;
+  }
+
+  document.getElementById("cartOverlay").classList.remove("show");
+  document.getElementById("checkoutOverlay").classList.add("show");
+  renderCheckout();
+
+  albaOpenOverlay("checkout");
+}
 function closeCheckout(e){if(!e||e.target.id==="checkoutOverlay")document.getElementById("checkoutOverlay").classList.remove("show")}
 function getDeliveryCharge(){
   const area=document.getElementById("deliveryArea")?.value||"dhaka";
@@ -1429,3 +1473,118 @@ function heroPause(){
 }
 
 initHeroSlider();
+
+
+// =====================================================
+// AL-BARAKAH MOBILE BACK BUTTON / OVERLAY HISTORY FIX
+// =====================================================
+
+(function () {
+
+  let albaBackLock = false;
+
+  function getOverlayState() {
+    const product = document.getElementById("productModal");
+    const cart = document.getElementById("cartOverlay");
+    const checkout = document.getElementById("checkoutOverlay");
+    const business = document.getElementById("businessFormOverlay");
+
+    if (checkout && checkout.classList.contains("show")) {
+      return "checkout";
+    }
+
+    if (cart && cart.classList.contains("show")) {
+      return "cart";
+    }
+
+    if (product && product.classList.contains("show")) {
+      return "product";
+    }
+
+    if (business && business.classList.contains("show")) {
+      return "business";
+    }
+
+    return null;
+  }
+
+  function pushOverlayState(type) {
+    if (albaBackLock) return;
+
+    const current = history.state;
+
+    if (!current || !current.albaOverlay) {
+      history.pushState(
+        { albaOverlay: type },
+        "",
+        window.location.href.split("#")[0]
+      );
+    } else {
+      history.replaceState(
+        { albaOverlay: type },
+        "",
+        window.location.href.split("#")[0]
+      );
+    }
+  }
+
+  function closeCurrentOverlay() {
+
+    const checkout = document.getElementById("checkoutOverlay");
+    const cart = document.getElementById("cartOverlay");
+    const product = document.getElementById("productModal");
+    const business = document.getElementById("businessFormOverlay");
+
+    if (checkout && checkout.classList.contains("show")) {
+      checkout.classList.remove("show");
+      return true;
+    }
+
+    if (cart && cart.classList.contains("show")) {
+      cart.classList.remove("show");
+      return true;
+    }
+
+    if (product && product.classList.contains("show")) {
+      product.classList.remove("show");
+      document.body.classList.remove("modal-open");
+      return true;
+    }
+
+    if (business && business.classList.contains("show")) {
+      business.classList.remove("show");
+      return true;
+    }
+
+    return false;
+  }
+
+  window.addEventListener("popstate", function () {
+
+    albaBackLock = true;
+
+    const closed = closeCurrentOverlay();
+
+    albaBackLock = false;
+
+    if (!closed) {
+      // কোনো popup খোলা না থাকলে browser-এর স্বাভাবিক Back কাজ করবে
+      return;
+    }
+
+    // Overlay বন্ধ হওয়ার পর history state পরিষ্কার করা
+    if (history.state && history.state.albaOverlay) {
+      history.replaceState(
+        null,
+        "",
+        window.location.href.split("#")[0]
+      );
+    }
+  });
+
+  // Overlay open হলে history state তৈরি
+  window.albaOpenOverlay = function (type) {
+    pushOverlayState(type);
+  };
+
+})();
