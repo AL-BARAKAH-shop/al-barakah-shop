@@ -1,0 +1,42 @@
+AL-BARAKAH V5 — FREE E-COMMERCE WEBSITE
+=========================================
+
+এই V5 version-এ আপনার দেওয়া Google Apps Script /exec URL আগে থেকেই বসানো হয়েছে:
+https://script.google.com/macros/s/AKfycbx0RZ50jdoUqitqMlvuOEaxp_8wlepyPLT4Q9jT8UVljVkAc9D3dFxqiJgDyVlEYz0M/exec
+
+V5 FEATURES
+------------
+1. Product card-এ ক্লিক করলে Premium Product Details খুলবে
+2. প্রতিটি product-এর ৫টি image gallery
+3. বড় image + thumbnail + previous/next
+4. Product description ও features
+5. Cart + quantity
+6. Checkout
+7. Google Sheet-এ order save
+8. WhatsApp order
+9. Search + category filter
+10. GitHub Pages ready (.nojekyll + index.html root)
+
+IMPORTANT ABOUT CURRENT 5 PHOTOS
+--------------------------------
+বর্তমানে আপনার কাছে থাকা ৫টি lamp image-কে প্রতিটি product-এর gallery হিসেবে ব্যবহার করা হয়েছে।
+আপনি ভবিষ্যতে প্রতিটি product-এর জন্য আলাদা ৫টি ছবি দিলে script.js-এর images array-তে সেই ৫টি ছবি বসিয়ে দিতে পারবেন।
+
+GOOGLE APPS SCRIPT
+------------------
+আপনার /exec URL script.js-এ already configured। Code.gs-এর deployment URL পরিবর্তন করলে script.js-এর APPS_SCRIPT_URL-ও পরিবর্তন করতে হবে।
+
+GITHUB PAGES
+------------
+1. GitHub-এ নতুন repository তৈরি করুন।
+2. এই ZIP-এর সব file repository-এর root-এ upload করুন।
+3. Settings > Pages > Build and deployment > Source: Deploy from a branch
+4. Branch: main
+5. Folder: /(root)
+6. Save
+7. কয়েক মিনিট পরে Visit site থেকে website খুলুন।
+
+NOTE
+----
+GitHub Pages static site hosting; আলাদা paid hosting প্রয়োজন নেই।
+Google Sheet + Apps Script order backend হিসেবে কাজ করবে।
