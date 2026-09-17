@@ -615,57 +615,8 @@ body.modal-open{overflow:hidden}
     z-index:8 !important;
   }
 
-  /* -----------------------------------------------------
-     RIGHT SWIPE ARROW
-     Important: right side only, so it can NEVER cover
-     the "সব" button on the left.
-     ----------------------------------------------------- */
-  #categories.alba-sticky-category::after{
-    content:"›" !important;
-    position:absolute !important;
-    top:50% !important;
-    right:10px !important;
-    left:auto !important;
-    bottom:auto !important;
-
-    width:28px !important;
-    height:28px !important;
-
-    display:flex !important;
-    align-items:center !important;
-    justify-content:center !important;
-
-    margin:0 !important;
-    padding:0 !important;
-
-    transform:translateY(-50%) !important;
-
-    border-radius:50% !important;
-    background:rgba(184,137,62,.96) !important;
-    color:#fff !important;
-
-    font-size:22px !important;
-    font-weight:900 !important;
-    line-height:1 !important;
-
-    box-shadow:0 5px 14px rgba(0,0,0,.16) !important;
-
-    pointer-events:none !important;
-    z-index:10 !important;
-
-    animation:albaCategoryArrow 1.5s ease-in-out infinite !important;
-  }
-
-  @keyframes albaCategoryArrow{
-    0%,100%{
-      transform:translate(0,-50%);
-      opacity:.92;
-    }
-    50%{
-      transform:translate(5px,-50%);
-      opacity:1;
-    }
-  }
+  
+  
 
   /* -----------------------------------------------------
      FIRST-VISIT HINT
@@ -771,4 +722,233 @@ body.modal-open{overflow:hidden}
     padding:7px 11px;
     bottom:-40px;
   }
+}
+
+/* =====================================================
+   AL-BARAKAH
+   PROFESSIONAL MOBILE CATEGORY UX
+   ===================================================== */
+
+@media (max-width:650px){
+
+  .alba-category-wrap{
+    position:relative !important;
+    width:100% !important;
+    margin-bottom:58px !important;
+  }
+
+  #categories.alba-sticky-category{
+
+    position:sticky !important;
+
+    top:68px !important;
+
+    display:flex !important;
+    align-items:center !important;
+
+    width:100% !important;
+
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+
+    gap:9px !important;
+
+    /*
+     * ডানদিকে indicator-এর জন্য
+     * সামান্য জায়গা রাখা হচ্ছে
+     */
+    padding:
+      10px 48px 17px 8px !important;
+
+    box-sizing:border-box !important;
+
+    scrollbar-width:none !important;
+
+    -webkit-overflow-scrolling:touch !important;
+
+    overscroll-behavior-x:contain !important;
+
+    scroll-behavior:smooth !important;
+  }
+
+
+  #categories.alba-sticky-category::-webkit-scrollbar{
+    display:none !important;
+  }
+
+
+  /*
+   * Category button কখনো shrink করবে না
+   */
+  #categories.alba-sticky-category .cat{
+
+    flex:0 0 auto !important;
+
+    position:relative !important;
+
+    z-index:2 !important;
+
+    margin:0 !important;
+  }
+
+
+  /*
+   * ডান পাশে শুধু subtle fade থাকবে
+   * কোনো arrow button থাকবে না
+   */
+  #categories.alba-sticky-category::before{
+
+    content:"";
+
+    position:absolute !important;
+
+    top:0 !important;
+    right:0 !important;
+    bottom:0 !important;
+
+    width:52px !important;
+
+    z-index:5 !important;
+
+    pointer-events:none !important;
+
+    background:linear-gradient(
+      90deg,
+      rgba(250,249,247,0),
+      rgba(250,249,247,.96)
+    ) !important;
+  }
+
+
+  /*
+   * প্রথমবারের Hint
+   */
+  .alba-category-wrap #albaCategorySwipeHint{
+
+    position:absolute !important;
+
+    left:50% !important;
+
+    bottom:-43px !important;
+
+    display:none !important;
+
+    align-items:center !important;
+    justify-content:center !important;
+
+    gap:6px !important;
+
+    width:max-content !important;
+
+    max-width:calc(100% - 28px) !important;
+
+    padding:8px 14px !important;
+
+    border-radius:999px !important;
+
+    background:#171717 !important;
+
+    color:#fff !important;
+
+    font-size:11px !important;
+
+    font-weight:700 !important;
+
+    line-height:1.4 !important;
+
+    white-space:nowrap !important;
+
+    opacity:0 !important;
+
+    transform:
+      translate(-50%,8px)
+      scale(.97) !important;
+
+    pointer-events:none !important;
+
+    box-shadow:
+      0 7px 22px rgba(0,0,0,.18) !important;
+
+    transition:
+      opacity .3s ease,
+      transform .3s ease !important;
+
+    z-index:50 !important;
+  }
+
+
+  .alba-category-wrap #albaCategorySwipeHint.show{
+
+    display:flex !important;
+
+    opacity:1 !important;
+
+    transform:
+      translate(-50%,0)
+      scale(1) !important;
+  }
+
+
+  .alba-hint-icon{
+
+    font-size:14px !important;
+
+    animation:
+      albaHintHand 1s ease-in-out infinite !important;
+  }
+
+
+  .alba-hint-arrow{
+
+    font-size:15px !important;
+
+    animation:
+      albaHintArrow 1s ease-in-out infinite !important;
+  }
+
+
+  @keyframes albaHintHand{
+
+    0%,100%{
+      transform:translateX(0);
+    }
+
+    50%{
+      transform:translateX(5px);
+    }
+
+  }
+
+
+  @keyframes albaHintArrow{
+
+    0%,100%{
+      transform:translateX(0);
+    }
+
+    50%{
+      transform:translateX(6px);
+    }
+
+  }
+
+}
+
+
+/* ছোট ফোন */
+@media (max-width:380px){
+
+  .alba-category-wrap{
+    margin-bottom:54px !important;
+  }
+
+  .alba-category-wrap #albaCategorySwipeHint{
+
+    font-size:10px !important;
+
+    padding:7px 11px !important;
+
+    bottom:-40px !important;
+  }
+
 }
