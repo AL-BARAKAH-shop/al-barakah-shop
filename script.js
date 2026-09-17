@@ -34,10 +34,10 @@ const galleryImages=[
       "images/table-lamp-1-5.webp",
 	  
       "images/table-lamp-2.webp",
-      "images/table-lamp-2-2.webp",
-      "images/table-lamp-2-3.webp",
-      "images/table-lamp-2-4.webp",
-      "images/table-lamp-2-5.webp",
+      "images/table-lamp-1-2.webp",
+      "images/table-lamp-1-3.webp",
+      "images/table-lamp-1-4.webp",
+      "images/table-lamp-1-5.webp",
 	  
       "images/table-lamp-3.webp",
       "images/table-lamp-3-2.webp",
@@ -578,10 +578,10 @@ const products=[
     img:"images/table-lamp-2.webp",
     images:[
       "images/table-lamp-2.webp",
-      "images/table-lamp-2-2.webp",
-      "images/table-lamp-2-3.webp",
-      "images/table-lamp-2-4.webp",
-      "images/table-lamp-2-5.webp"
+      "images/table-lamp-1-2.webp",
+      "images/table-lamp-1-3.webp",
+      "images/table-lamp-1-4.webp",
+      "images/table-lamp-1-5.webp"
     ],
     short:"ঘর সাজাতে ইসলামিক আলোর ডিজাইন",
     desc:"উষ্ণ গোল্ডেন lighting-এর সঙ্গে Islamic calligraphy inspired design। ঘরের ambience আরও premium দেখাতে এবং বিশেষ মুহূর্তে উপহার দিতে এই designটি দারুণ একটি choice।",
