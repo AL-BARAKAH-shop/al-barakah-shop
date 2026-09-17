@@ -1453,11 +1453,17 @@ function isStockOut(p){
          String(s).trim().toLowerCase() === "stock out" ||
          String(s).trim().toLowerCase() === "stockout";
 }
+
 function stockStatusHTML(p){
   return isStockOut(p)
     ? '<span class="stock-status stock-out">🔴 Stock Out</span>'
     : '<span class="stock-status stock-in">🟢 In Stock</span>';
 }
+
+function isInStock(p){
+  return !isStockOut(p);
+}
+
 function setProductStock(id, inStock){
   const p=products.find(x=>x.id===id);
   if(p) p.stock=!!inStock;
