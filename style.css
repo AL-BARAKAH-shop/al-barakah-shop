@@ -552,3 +552,271 @@ body.modal-open{overflow:hidden}
   #categories.categories{margin-bottom:18px}
   .stock-status{font-size:11px}
 }
+
+/* =====================================================
+   AL-BARAKAH MOBILE CATEGORY DISCOVERABILITY
+   ===================================================== */
+
+@media (max-width: 650px){
+
+  #categories.alba-sticky-category{
+    position: sticky;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scroll-snap-type: x proximity;
+
+    padding-right: 55px !important;
+
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #categories.alba-sticky-category .cat{
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  /* Right-side scroll indicator */
+  #categories.alba-sticky-category::before{
+    content:"";
+    position:absolute;
+    top:0;
+    right:0;
+    bottom:0;
+
+    width:55px;
+
+    background:
+      linear-gradient(
+        90deg,
+        rgba(250,249,247,0),
+        rgba(250,249,247,.96)
+      );
+
+    pointer-events:none;
+    z-index:5;
+  }
+
+  /* Arrow indicator */
+  #categories.alba-sticky-category::after{
+    content:"›";
+    position:absolute;
+
+    right:9px;
+    top:50%;
+    transform:translateY(-50%);
+
+    width:30px;
+    height:30px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:50%;
+
+    background:rgba(184,137,62,.95);
+    color:#fff;
+
+    font-size:24px;
+    font-weight:700;
+
+    line-height:1;
+
+    box-shadow:0 5px 14px rgba(0,0,0,.15);
+
+    pointer-events:none;
+    z-index:6;
+
+    animation: albaCategoryHint 1.6s ease-in-out infinite;
+  }
+
+  @keyframes albaCategoryHint{
+    0%,100%{
+      transform:translate(0,-50%);
+    }
+
+    50%{
+      transform:translate(5px,-50%);
+    }
+  }
+
+}
+
+/* =====================================================
+   AL-BARAKAH MOBILE CATEGORY SWIPE HINT
+   ===================================================== */
+
+.alba-category-wrap{
+  position:relative;
+  width:100%;
+}
+
+
+/* Hint */
+.alba-category-wrap #albaCategorySwipeHint{
+
+  display:none;
+
+  position:absolute;
+
+  left:50%;
+  bottom:-48px;
+
+  transform:
+    translate(-50%, 10px)
+    scale(.96);
+
+  z-index:30;
+
+  width:max-content;
+  max-width:calc(100% - 24px);
+
+  padding:9px 14px;
+
+  border-radius:999px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(184,137,62,.98),
+      rgba(157,111,43,.98)
+    );
+
+  color:#fff;
+
+  font-size:12px;
+  font-weight:700;
+
+  line-height:1.3;
+
+  white-space:nowrap;
+
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.18),
+    0 2px 5px rgba(0,0,0,.08);
+
+  opacity:0;
+
+  pointer-events:none;
+
+  transition:
+    opacity .35s ease,
+    transform .35s ease;
+}
+
+
+/* Hint visible */
+.alba-category-wrap #albaCategorySwipeHint.show{
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  gap:6px;
+
+  opacity:1;
+
+  transform:
+    translate(-50%, 0)
+    scale(1);
+}
+
+
+/* হাতের Icon */
+.alba-hint-icon{
+
+  display:inline-block;
+
+  font-size:15px;
+
+  animation:
+    albaHintHand 1s ease-in-out infinite;
+}
+
+
+/* Arrow */
+.alba-hint-arrow{
+
+  display:inline-block;
+
+  font-size:16px;
+  font-weight:900;
+
+  animation:
+    albaHintArrow 1s ease-in-out infinite;
+}
+
+
+/* Hand animation */
+@keyframes albaHintHand{
+
+  0%,100%{
+    transform:translateX(0);
+  }
+
+  50%{
+    transform:translateX(5px);
+  }
+
+}
+
+
+/* Arrow animation */
+@keyframes albaHintArrow{
+
+  0%,100%{
+    transform:translateX(0);
+  }
+
+  50%{
+    transform:translateX(6px);
+  }
+
+}
+
+
+/* =====================================================
+   MOBILE ONLY
+   ===================================================== */
+
+@media (max-width:650px){
+
+  .alba-category-wrap{
+    margin-bottom:50px;
+  }
+
+  #categories.alba-sticky-category{
+    position:sticky;
+    overflow-x:auto;
+    overflow-y:hidden;
+
+    -webkit-overflow-scrolling:touch;
+
+    scroll-behavior:smooth;
+
+    scrollbar-width:none;
+  }
+
+  #categories.alba-sticky-category::-webkit-scrollbar{
+    display:none;
+  }
+
+}
+
+
+/* ছোট মোবাইল */
+@media (max-width:380px){
+
+  .alba-category-wrap #albaCategorySwipeHint{
+
+    font-size:10.5px;
+
+    padding:8px 11px;
+
+    bottom:-44px;
+
+  }
+
+}
