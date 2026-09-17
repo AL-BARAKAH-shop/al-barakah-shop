@@ -1588,3 +1588,146 @@ initHeroSlider();
   };
 
 })();
+
+
+// =====================================================
+// AL-BARAKAH MOBILE CATEGORY SWIPE HINT
+// প্রথমবার Category দেখার সময় ৩ সেকেন্ডের Hint
+// =====================================================
+
+(function () {
+
+  const HINT_KEY = "albarakah_category_swipe_hint_seen";
+
+  function showCategorySwipeHint() {
+
+    // আগে দেখানো হয়ে থাকলে আর দেখাবে না
+    if (localStorage.getItem(HINT_KEY) === "1") {
+      return;
+    }
+
+    const categories = document.getElementById("categories");
+
+    if (!categories) return;
+
+    // শুধু Mobile-এর জন্য
+    if (window.innerWidth > 650) return;
+
+    // একই hint একাধিকবার তৈরি হওয়া বন্ধ
+    if (document.getElementById("albaCategorySwipeHint")) {
+      return;
+    }
+
+    // Category wrapper তৈরি
+    let wrapper = categories.parentElement;
+
+    if (!wrapper.classList.contains("alba-category-wrap")) {
+
+      const newWrapper = document.createElement("div");
+
+      newWrapper.className = "alba-category-wrap";
+
+      categories.parentNode.insertBefore(
+        newWrapper,
+        categories
+      );
+
+      newWrapper.appendChild(categories);
+
+      wrapper = newWrapper;
+    }
+
+    // Hint তৈরি
+    const hint = document.createElement("div");
+
+    hint.id = "albaCategorySwipeHint";
+
+    hint.innerHTML = `
+      <span class="alba-hint-icon">👉</span>
+      <span>আরও ক্যাটাগরি দেখতে ডানে সোয়াইপ করুন</span>
+      <span class="alba-hint-arrow">→</span>
+    `;
+
+    wrapper.appendChild(hint);
+
+    // Hint দেখানোর animation
+    requestAnimationFrame(() => {
+      hint.classList.add("show");
+    });
+
+    // একবার দেখানো হয়েছে — মনে রাখবে
+    localStorage.setItem(HINT_KEY, "1");
+
+    // ৩ সেকেন্ড পরে চলে যাবে
+    setTimeout(() => {
+
+      hint.classList.remove("show");
+
+      setTimeout(() => {
+        hint.remove();
+      }, 350);
+
+    }, 3000);
+  }
+
+
+  // Category viewport-এ আসলে Hint দেখাবে
+  function initCategorySwipeHint() {
+
+    const categories = document.getElementById("categories");
+
+    if (!categories) {
+      setTimeout(initCategorySwipeHint, 500);
+      return;
+    }
+
+    // আগে দেখানো হয়ে থাকলে observer-এর প্রয়োজন নেই
+    if (localStorage.getItem(HINT_KEY) === "1") {
+      return;
+    }
+
+    // Mobile ছাড়া Hint নয়
+    if (window.innerWidth > 650) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      function (entries) {
+
+        entries.forEach(function (entry) {
+
+          if (entry.isIntersecting) {
+
+            showCategorySwipeHint();
+
+            observer.disconnect();
+
+          }
+
+        });
+
+      },
+      {
+        threshold: 0.35
+      }
+    );
+
+    observer.observe(categories);
+  }
+
+
+  // Page load হওয়ার পরে শুরু
+  if (document.readyState === "loading") {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initCategorySwipeHint
+    );
+
+  } else {
+
+    initCategorySwipeHint();
+
+  }
+
+})();
