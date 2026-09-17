@@ -209,7 +209,7 @@ const galleryImages=[
 const products=[
   {
     id:1,
-	//stock:false,
+	stock:false,
     name:"আল্লাহু-আকবার PVC Wall Lamp",
     cat:"ওয়াল ল্যাম্প",
     price:650,
