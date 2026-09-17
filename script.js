@@ -1515,29 +1515,59 @@ function renderProductModal(){
 function selectProductImage(i){currentImage=i;renderProductModal()}
 function nextProductImage(){if(!currentProduct)return;currentImage=(currentImage+1)%currentProduct.images.length;renderProductModal()}
 function prevProductImage(){if(!currentProduct)return;currentImage=(currentImage-1+currentProduct.images.length)%currentProduct.images.length;renderProductModal()}
-function add(id){const p=products.find(a=>a.id===id);if(!p||isStockOut(p))return;let x=cart.find(a=>a.id===id);if(x)x.qty++;else cart.push({id,qty:1});save();renderCart();openCart()}
+function add(id){
+  let p=products.find(a=>a.id===id);
+  if(!p)return;
+
+  let x=cart.find(a=>a.id===id);
+
+  if(x){
+    x.qty++;
+  }else{
+    cart.push({
+      id:id,
+      qty:1
+    });
+  }
+
+  save();
+  renderCart();
+  openCart();
+}
+
 function orderNow(id){
   let p=products.find(a=>a.id===id);
 
-  if(!isInStock(p)){
-    alert("এই পণ্যটি বর্তমানে Stock Out।");
+  if(!p){
+    alert("পণ্যটি পাওয়া যাচ্ছে না।");
     return;
   }
 
   let x=cart.find(a=>a.id===id);
 
-  if(x)x.qty++;
-  else cart.push({id,qty:1});
+  if(x){
+    x.qty++;
+  }else{
+    cart.push({
+      id:id,
+      qty:1
+    });
+  }
 
   save();
   renderCart();
 
-  document.getElementById("productModal").classList.remove("show");
-  document.body.classList.remove("modal-open");
+  closeProduct();
 
   openCart();
 }
-function total(){return cart.reduce((s,x)=>{let p=products.find(p=>p.id===x.id);return s+(p?currentPrice(p)*x.qty:0)},0)}
+
+function total(){
+  return cart.reduce((s,x)=>{
+    let p=products.find(p=>p.id===x.id);
+    return s+(p?p.price*x.qty:0);
+  },0);
+}
 function change(id,d){let x=cart.find(a=>a.id===id);if(!x)return;x.qty+=d;if(x.qty<1)cart=cart.filter(a=>a.id!==id);save();renderCart();renderCheckout()}
 function renderCart(){let e=document.getElementById("cartItems");if(!cart.length){e.innerHTML="<p style='color:#888'>কার্ট খালি।</p>";document.getElementById("cartTotal").textContent=money(0);return}e.innerHTML=cart.map(x=>{let p=products.find(a=>a.id===x.id);if(!p)return "";return `<div class="cart-row"><div class="thumb"><img src="${p.img}"></div><div><h4>${p.name}</h4><small>${money(currentPrice(p))}</small><div class="qty"><button onclick="change(${p.id},-1)">−</button><b>${x.qty}</b><button onclick="change(${p.id},1)">+</button></div></div><button class="remove" onclick="removeItem(${p.id})">✕</button></div>`}).join("");document.getElementById("cartTotal").textContent=money(total())}
 function removeItem(id){cart=cart.filter(x=>x.id!==id);save();renderCart();renderCheckout()}
@@ -1549,19 +1579,24 @@ function openCart(){
 }
 function closeCart(e){if(!e||e.target.id==="cartOverlay")document.getElementById("cartOverlay").classList.remove("show")}
 function openCheckout(){
-  cart=cart.filter(x=>isInStock(products.find(p=>p.id===x.id)));
-  save();
 
-  if(!cart.length){
+  if(!cart || !cart.length){
     alert("আগে একটি পণ্য কার্টে যোগ করুন।");
     return;
   }
 
-  document.getElementById("cartOverlay").classList.remove("show");
-  document.getElementById("checkoutOverlay").classList.add("show");
-  renderCheckout();
+  const cartOverlay=document.getElementById("cartOverlay");
+  const checkoutOverlay=document.getElementById("checkoutOverlay");
 
-  albaOpenOverlay("checkout");
+  if(cartOverlay){
+    cartOverlay.classList.remove("show");
+  }
+
+  if(checkoutOverlay){
+    checkoutOverlay.classList.add("show");
+  }
+
+  renderCheckout();
 }
 function closeCheckout(e){if(!e||e.target.id==="checkoutOverlay")document.getElementById("checkoutOverlay").classList.remove("show")}
 function getDeliveryCharge(){
