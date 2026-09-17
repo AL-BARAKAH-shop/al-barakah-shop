@@ -615,8 +615,57 @@ body.modal-open{overflow:hidden}
     z-index:8 !important;
   }
 
-  
-  
+  /* -----------------------------------------------------
+     RIGHT SWIPE ARROW
+     Important: right side only, so it can NEVER cover
+     the "সব" button on the left.
+     ----------------------------------------------------- */
+  #categories.alba-sticky-category::after{
+    content:"›" !important;
+    position:absolute !important;
+    top:50% !important;
+    right:10px !important;
+    left:auto !important;
+    bottom:auto !important;
+
+    width:28px !important;
+    height:28px !important;
+
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+
+    margin:0 !important;
+    padding:0 !important;
+
+    transform:translateY(-50%) !important;
+
+    border-radius:50% !important;
+    background:rgba(184,137,62,.96) !important;
+    color:#fff !important;
+
+    font-size:22px !important;
+    font-weight:900 !important;
+    line-height:1 !important;
+
+    box-shadow:0 5px 14px rgba(0,0,0,.16) !important;
+
+    pointer-events:none !important;
+    z-index:10 !important;
+
+    animation:albaCategoryArrow 1.5s ease-in-out infinite !important;
+  }
+
+  @keyframes albaCategoryArrow{
+    0%,100%{
+      transform:translate(0,-50%);
+      opacity:.92;
+    }
+    50%{
+      transform:translate(5px,-50%);
+      opacity:1;
+    }
+  }
 
   /* -----------------------------------------------------
      FIRST-VISIT HINT
@@ -724,231 +773,211 @@ body.modal-open{overflow:hidden}
   }
 }
 
+
 /* =====================================================
-   AL-BARAKAH
-   PROFESSIONAL MOBILE CATEGORY UX
+   AL-BARAKAH SMART MOBILE CATEGORY — FINAL FIX
+   Arrow is OUTSIDE the horizontal scroll viewport.
+   No other site sections are changed.
    ===================================================== */
-
-@media (max-width:650px){
-
-  .alba-category-wrap{
-    position:relative !important;
-    width:100% !important;
-    margin-bottom:58px !important;
-  }
-
-  #categories.alba-sticky-category{
-
-    position:sticky !important;
-
-    top:68px !important;
-
-    display:flex !important;
-    align-items:center !important;
-
-    width:100% !important;
-
-    overflow-x:auto !important;
-    overflow-y:hidden !important;
-
-    gap:9px !important;
-
-    /*
-     * ডানদিকে indicator-এর জন্য
-     * সামান্য জায়গা রাখা হচ্ছে
-     */
-    padding:
-      10px 48px 17px 8px !important;
-
-    box-sizing:border-box !important;
-
-    scrollbar-width:none !important;
-
-    -webkit-overflow-scrolling:touch !important;
-
-    overscroll-behavior-x:contain !important;
-
-    scroll-behavior:smooth !important;
-  }
-
-
-  #categories.alba-sticky-category::-webkit-scrollbar{
-    display:none !important;
-  }
-
-
-  /*
-   * Category button কখনো shrink করবে না
-   */
-  #categories.alba-sticky-category .cat{
-
-    flex:0 0 auto !important;
-
-    position:relative !important;
-
-    z-index:2 !important;
-
-    margin:0 !important;
-  }
-
-
-  /*
-   * ডান পাশে শুধু subtle fade থাকবে
-   * কোনো arrow button থাকবে না
-   */
-  #categories.alba-sticky-category::before{
-
-    content:"";
-
-    position:absolute !important;
-
-    top:0 !important;
-    right:0 !important;
-    bottom:0 !important;
-
-    width:52px !important;
-
-    z-index:5 !important;
-
-    pointer-events:none !important;
-
-    background:linear-gradient(
-      90deg,
-      rgba(250,249,247,0),
-      rgba(250,249,247,.96)
-    ) !important;
-  }
-
-
-  /*
-   * প্রথমবারের Hint
-   */
-  .alba-category-wrap #albaCategorySwipeHint{
-
-    position:absolute !important;
-
-    left:50% !important;
-
-    bottom:-43px !important;
-
-    display:none !important;
-
-    align-items:center !important;
-    justify-content:center !important;
-
-    gap:6px !important;
-
-    width:max-content !important;
-
-    max-width:calc(100% - 28px) !important;
-
-    padding:8px 14px !important;
-
-    border-radius:999px !important;
-
-    background:#171717 !important;
-
-    color:#fff !important;
-
-    font-size:11px !important;
-
-    font-weight:700 !important;
-
-    line-height:1.4 !important;
-
-    white-space:nowrap !important;
-
-    opacity:0 !important;
-
-    transform:
-      translate(-50%,8px)
-      scale(.97) !important;
-
-    pointer-events:none !important;
-
-    box-shadow:
-      0 7px 22px rgba(0,0,0,.18) !important;
-
-    transition:
-      opacity .3s ease,
-      transform .3s ease !important;
-
-    z-index:50 !important;
-  }
-
-
-  .alba-category-wrap #albaCategorySwipeHint.show{
-
-    display:flex !important;
-
-    opacity:1 !important;
-
-    transform:
-      translate(-50%,0)
-      scale(1) !important;
-  }
-
-
-  .alba-hint-icon{
-
-    font-size:14px !important;
-
-    animation:
-      albaHintHand 1s ease-in-out infinite !important;
-  }
-
-
-  .alba-hint-arrow{
-
-    font-size:15px !important;
-
-    animation:
-      albaHintArrow 1s ease-in-out infinite !important;
-  }
-
-
-  @keyframes albaHintHand{
-
-    0%,100%{
-      transform:translateX(0);
-    }
-
-    50%{
-      transform:translateX(5px);
-    }
-
-  }
-
-
-  @keyframes albaHintArrow{
-
-    0%,100%{
-      transform:translateX(0);
-    }
-
-    50%{
-      transform:translateX(6px);
-    }
-
-  }
-
+.category-scroll-shell{
+  position:relative;
+  width:100%;
+}
+.category-scroll-shell .categories{
+  width:100%;
+}
+.category-scroll-arrow{
+  display:none;
+}
+.category-scroll-hint{
+  display:none;
 }
 
+@media (max-width:650px){
+  .category-scroll-shell{
+    position:sticky;
+    top:68px;
+    z-index:19;
+    width:calc(100% + 10px);
+    margin-left:-5px;
+    margin-right:-5px;
+    background:rgba(250,249,247,.94);
+    -webkit-backdrop-filter:blur(16px) saturate(140%);
+    backdrop-filter:blur(16px) saturate(140%);
+    border-top:1px solid rgba(184,137,62,.08);
+    border-bottom:1px solid rgba(184,137,62,.18);
+    box-shadow:0 10px 28px rgba(23,23,23,.08),0 1px 0 rgba(255,255,255,.85) inset;
+    padding:8px 0 14px;
+    box-sizing:border-box;
+  }
 
-/* ছোট ফোন */
+  .category-scroll-shell .categories,
+  .category-scroll-shell #categories.alba-sticky-category{
+    position:relative !important;
+    top:auto !important;
+    z-index:1 !important;
+    margin:0 !important;
+    padding:0 52px 0 8px !important;
+    width:100% !important;
+    min-height:42px;
+    display:flex !important;
+    align-items:center !important;
+    gap:7px !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    scrollbar-width:none !important;
+    -ms-overflow-style:none !important;
+    -webkit-overflow-scrolling:touch !important;
+    overscroll-behavior-x:contain !important;
+    scroll-behavior:smooth !important;
+    scroll-snap-type:none !important;
+    box-shadow:none !important;
+    border:0 !important;
+    background:transparent !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+
+  .category-scroll-shell .categories::-webkit-scrollbar{
+    display:none !important;
+  }
+
+  .category-scroll-shell .categories .cat{
+    flex:0 0 auto !important;
+    position:relative !important;
+    z-index:2 !important;
+    margin:0 !important;
+    scroll-snap-align:none !important;
+  }
+
+  /* The arrow is a SIBLING of #categories, not its pseudo-element. */
+  .category-scroll-arrow{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    width:30px;
+    height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:rgba(184,137,62,.96);
+    color:#fff;
+    font-size:23px;
+    font-weight:900;
+    line-height:1;
+    box-shadow:0 5px 14px rgba(0,0,0,.16);
+    z-index:20;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .25s ease,transform .25s ease;
+  }
+
+  .category-scroll-arrow.show{
+    opacity:1;
+    animation:albaCategoryOutsideArrow 1.45s ease-in-out infinite;
+  }
+
+  .category-scroll-shell.has-overflow .category-scroll-arrow.show{
+    display:flex;
+  }
+
+  .category-scroll-shell.no-overflow .category-scroll-arrow{
+    display:none !important;
+  }
+
+  /* Fade is also OUTSIDE the scroll content. */
+  .category-scroll-fade{
+    position:absolute;
+    right:0;
+    top:0;
+    bottom:0;
+    width:58px;
+    z-index:15;
+    pointer-events:none;
+    background:linear-gradient(90deg,rgba(250,249,247,0),rgba(250,249,247,.96));
+  }
+
+  .category-scroll-hint{
+    position:absolute;
+    left:50%;
+    bottom:-43px;
+    transform:translate(-50%,8px) scale(.97);
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    width:max-content;
+    max-width:calc(100% - 28px);
+    padding:8px 14px;
+    border-radius:999px;
+    background:#171717;
+    color:#fff;
+    font-size:11px;
+    font-weight:700;
+    line-height:1.4;
+    white-space:nowrap;
+    box-shadow:0 7px 22px rgba(0,0,0,.18);
+    z-index:30;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .3s ease,transform .3s ease;
+  }
+
+  .category-scroll-hint.show{
+    display:flex;
+    opacity:1;
+    transform:translate(-50%,0) scale(1);
+  }
+
+  .category-scroll-hint .hint-hand{
+    display:inline-block;
+    font-size:14px;
+    animation:albaHintHandOutside 1s ease-in-out infinite;
+  }
+
+  .category-scroll-hint .hint-arrow{
+    display:inline-block;
+    font-size:15px;
+    font-weight:900;
+    animation:albaHintArrowOutside 1s ease-in-out infinite;
+  }
+
+  @keyframes albaCategoryOutsideArrow{
+    0%,100%{transform:translate(0,-50%)}
+    50%{transform:translate(5px,-50%)}
+  }
+  @keyframes albaHintHandOutside{
+    0%,100%{transform:translateX(0)}
+    50%{transform:translateX(4px)}
+  }
+  @keyframes albaHintArrowOutside{
+    0%,100%{transform:translateX(0)}
+    50%{transform:translateX(6px)}
+  }
+}
+
 @media (max-width:380px){
-
-  .alba-category-wrap{
-    margin-bottom:54px !important;
+  .category-scroll-shell{
+    width:calc(100% + 10px);
+    margin-left:-5px;
+    margin-right:-5px;
   }
-
-  .alba-category-wrap #albaCategorySwipeHint{
-
-    font-size:10px !important;
-
-    padding:7px 11px !important;
-
-    bottom:-40px !important;
+  .category-scroll-shell .categories,
+  .category-scroll-shell #categories.alba-sticky-category{
+    padding-left:7px !important;
+    padding-right:49px !important;
   }
-
+  .category-scroll-arrow{
+    right:7px;
+    width:27px;
+    height:27px;
+    font-size:21px;
+  }
+  .category-scroll-fade{width:52px}
+  .category-scroll-hint{
+    font-size:10px;
+    padding:7px 11px;
+    bottom:-40px;
+  }
 }
