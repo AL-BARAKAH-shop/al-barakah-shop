@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AL-BARAKAH | Premium Decorative Lamp</title>
+<title>AL-BARAKAH | Premium Products & Trusted Service</title>
 <meta name="description" content="AL-BARAKAH Premium Decorative Lamp">
 <link rel="stylesheet" href="style.css">
 <script>
@@ -139,7 +139,7 @@
       <div class="modal-actions">
         <button class="btn ghost" onclick="add(currentProduct.id);closeProduct()">🛒 কার্টে যোগ করুন</button>
         <button class="btn primary" onclick="orderNow(currentProduct.id)">⚡ অর্ডার করুন</button>
-        <button class="btn whatsapp-btn" onclick="if(currentProduct){window.open('https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent('আমি এই পণ্যটি সম্পর্কে জানতে চাই: '+currentProduct.name+' — '+money(currentProduct.price)),'_blank')} ">💬 WhatsApp</button>
+        <button class="btn whatsapp-btn" onclick="if(currentProduct){window.open('https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent('আমি এই পণ্যটি সম্পর্কে জানতে চাই: '+currentProduct.name+' — '+money(currentPrice(currentProduct))),'_blank')}">💬 WhatsApp</button>
       </div>
     </div>
   </div>
