@@ -1598,17 +1598,55 @@ function openCheckout(){
 
   renderCheckout();
 }
+
+
+async function openCheckout(){
+
+  if(!cart || !cart.length){
+    alert("আগে একটি পণ্য কার্টে যোগ করুন।");
+    return;
+  }
+
+  // Flash Offer-এর সময় নিশ্চিত করা
+  if(
+    typeof albaEnsureTimeSynced === "function" &&
+    typeof ALBA_OFFER !== "undefined" &&
+    ALBA_OFFER.enabled
+  ){
+    await albaEnsureTimeSynced();
+  }
+
+  const cartOverlay =
+    document.getElementById("cartOverlay");
+
+  const checkoutOverlay =
+    document.getElementById("checkoutOverlay");
+
+  if(cartOverlay){
+    cartOverlay.classList.remove("show");
+  }
+
+  if(checkoutOverlay){
+    checkoutOverlay.classList.add("show");
+  }
+
+  renderCheckout();
+}
+
+
+
 function closeCheckout(e){if(!e||e.target.id==="checkoutOverlay")document.getElementById("checkoutOverlay").classList.remove("show")}
 
 
 function getDeliveryCharge(){
 
-  // ================================================
-  // ACTIVE FREE DELIVERY OFFER
-  // ================================================
+  const area =
+    document.getElementById("deliveryArea")?.value ||
+    "dhaka";
 
+  // Flash Offer active হলে Free Delivery
   if(
-    typeof albaGetDeliveryCharge === "function" &&
+    typeof albaIsOfferActive === "function" &&
     albaIsOfferActive() &&
     ALBA_OFFER.type === "free_delivery"
   ){
@@ -1629,15 +1667,7 @@ function getDeliveryCharge(){
     }
   }
 
-
-  // ================================================
-  // NORMAL DELIVERY CHARGE
-  // ================================================
-
-  const area =
-    document.getElementById("deliveryArea")?.value ||
-    "dhaka";
-
+  // স্বাভাবিক Delivery Charge
   const weight = 1;
 
   const base =
@@ -2013,6 +2043,23 @@ async function placeOrder(ev){
 
   }
 
+
+if(
+  typeof ALBA_OFFER !== "undefined" &&
+  ALBA_OFFER.enabled &&
+  typeof albaEnsureTimeSynced === "function" &&
+  !albaTimeSynced
+){
+  const synced = await albaEnsureTimeSynced();
+
+  if(!synced){
+    alert(
+      "অফারের সময় যাচাই করা যাচ্ছে না। " +
+      "ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।"
+    );
+    return;
+  }
+}
 
   // ================================================
   // WHATSAPP MESSAGE
@@ -2880,80 +2927,256 @@ initHeroSlider();
 
 
 
+
+
+
+
+
+
+
 // =====================================================
 // AL-BARAKAH PREMIUM FLASH OFFER SYSTEM
+// SECURE FIXED-TIME COUNTDOWN
+// BANGLADESH TIME + ONLINE TIME SYNC
 // =====================================================
 
 const ALBA_OFFER = {
-
-  // true = Offer চালু
+	
+  // ===================================================
+  // true  = Offer চালু
   // false = Offer বন্ধ
-  enabled:true,
+  // ===================================================
+  enabled: true,
 
   // ===================================================
-  // 24 / 48 / 72 ঘণ্টা
+  // OFFER START AND END TIME
+  // Bangladesh Time (UTC +6)
   // ===================================================
-  durationHours:1,
+  startTime: "2026-09-19T14:00:00+06:00",
+  endTime:   "2026-09-19T23:00:00+06:00",
+
 
   // ===================================================
-  // নতুন Campaign শুরু করলে এই ID পরিবর্তন করবে
+  // CAMPAIGN ID
+  // নতুন Campaign চালু করলে ID পরিবর্তন করবেন
   // ===================================================
-  campaignId:"free-delivery-campaign-02",
+  campaignId: "free-delivery-campaign-3",
+
 
   // ===================================================
-  // Offer Type
-  //
+  // OFFER TYPE
   // free_delivery
   // extra_discount
   // ===================================================
-  type:"free_delivery",
+  type: "free_delivery",
 
-  // Extra discount চাইলে এখানে %
-  extraDiscountPercent:5,
 
-  // Minimum order amount
+  // ===================================================
+  // EXTRA DISCOUNT
+  // ===================================================
+  extraDiscountPercent: 5,
+
+
+  // ===================================================
+  // MINIMUM ORDER
   // 0 = কোনো minimum নেই
-  minOrder:0
-
+  // ===================================================
+  minOrder: 0
 };
 
 
-// =====================================================
-// OFFER STORAGE KEY
-// =====================================================
-
-const ALBA_OFFER_STORAGE_KEY =
-  "albarakah_offer_deadline_" +
-  ALBA_OFFER.campaignId;
-
 
 // =====================================================
-// GET / CREATE OFFER DEADLINE
+// TIME API
+// =====================================================
+//
+// Online server time ব্যবহার করা হবে।
+// তাই visitor-এর mobile/computer clock
+// পরিবর্তন করলেও countdown সেই clock অনুসরণ করবে না.
+//
 // =====================================================
 
-function albaGetOfferDeadline(){
+const ALBA_TIME_API =
+  "https://timeapi.io/api/Time/current/zone?timeZone=Asia%2FDhaka";
 
-  let deadline =
-    Number(
-      localStorage.getItem(
-        ALBA_OFFER_STORAGE_KEY
-      )
-    );
 
-  if(!deadline || deadline <= 0){
+// =====================================================
+// SERVER TIME VARIABLES
+// =====================================================
 
-    deadline =
-      Date.now() +
-      (ALBA_OFFER.durationHours * 60 * 60 * 1000);
+let albaServerTimeAtSync = null;
 
-    localStorage.setItem(
-      ALBA_OFFER_STORAGE_KEY,
-      String(deadline)
-    );
+let albaClientTimeAtSync = null;
 
+let albaTimeSynced = false;
+
+let albaTimeSyncTimer = null;
+
+
+// =====================================================
+// GET TRUSTED CURRENT TIME
+// =====================================================
+//
+// Server থেকে পাওয়া সময়ের সঙ্গে
+// client-এর elapsed time যোগ করে বর্তমান সময়
+// বের করা হবে।
+//
+// ফলে প্রতি সেকেন্ডে API call করার প্রয়োজন নেই।
+//
+// =====================================================
+
+function albaGetTrustedNow(){
+
+  // ===================================================
+  // Server time এখনো পাওয়া যায়নি
+  // ===================================================
+
+  if(
+    albaServerTimeAtSync === null ||
+    albaClientTimeAtSync === null
+  ){
+
+    return null;
   }
 
-  return deadline;
+
+  // ===================================================
+  // Server sync হওয়ার পর client-এ যত সময় গেছে
+  // ===================================================
+
+  const elapsed =
+    performance.now() -
+    albaClientTimeAtSync;
+
+
+  return (
+    albaServerTimeAtSync +
+    elapsed
+  );
+}
+
+
+// =====================================================
+// SYNC WITH ONLINE TIME
+// =====================================================
+
+async function albaSyncServerTime(){
+
+  try{
+
+    const requestStart =
+      performance.now();
+
+
+    const response =
+      await fetch(
+        ALBA_TIME_API,
+        {
+          method: "GET",
+          cache: "no-store"
+        }
+      );
+
+
+    if(!response.ok){
+
+      throw new Error(
+        "Time API request failed"
+      );
+    }
+
+
+    const data =
+      await response.json();
+
+
+    // =================================================
+    // API dateTime
+    // =================================================
+
+    if(!data.dateTime){
+
+      throw new Error(
+        "Invalid time response"
+      );
+    }
+
+
+    const serverTime =
+      new Date(
+        data.dateTime +
+        "+06:00"
+      ).getTime();
+
+
+    // =================================================
+    // Network request-এর আনুমানিক সময় বাদ দিয়ে
+    // মাঝামাঝি সময়ের কাছাকাছি sync করা হচ্ছে
+    // =================================================
+
+    const requestEnd =
+      performance.now();
+
+
+    const networkTime =
+      (
+        requestEnd -
+        requestStart
+      ) / 2;
+
+
+    albaServerTimeAtSync =
+      serverTime +
+      networkTime;
+
+
+    albaClientTimeAtSync =
+      performance.now();
+
+
+    albaTimeSynced =
+      true;
+
+
+    return true;
+
+  }catch(error){
+
+    console.warn(
+      "AL-BARAKAH time sync failed:",
+      error
+    );
+
+
+    return false;
+  }
+
+}
+
+
+// =====================================================
+// OFFER START TIMESTAMP
+// =====================================================
+
+function albaGetOfferStart(){
+
+  return new Date(
+    ALBA_OFFER.startTime
+  ).getTime();
+
+}
+
+
+// =====================================================
+// OFFER END TIMESTAMP
+// =====================================================
+
+function albaGetOfferEnd(){
+
+  return new Date(
+    ALBA_OFFER.endTime
+  ).getTime();
+
 }
 
 
@@ -2964,13 +3187,82 @@ function albaGetOfferDeadline(){
 function albaIsOfferActive(){
 
   if(!ALBA_OFFER.enabled){
+
     return false;
   }
 
-  const deadline =
-    albaGetOfferDeadline();
 
-  return Date.now() < deadline;
+  const now =
+    albaGetTrustedNow();
+
+
+  if(now === null){
+
+    return false;
+  }
+
+
+  const start =
+    albaGetOfferStart();
+
+
+  const end =
+    albaGetOfferEnd();
+
+
+  return (
+    now >= start &&
+    now < end
+  );
+
+}
+
+
+// =====================================================
+// OFFER UPCOMING?
+// =====================================================
+
+function albaIsOfferUpcoming(){
+
+  const now =
+    albaGetTrustedNow();
+
+
+  if(now === null){
+
+    return true;
+  }
+
+
+  return (
+    now <
+    albaGetOfferStart()
+  );
+
+}
+
+
+// =====================================================
+// OFFER EXPIRED?
+// =====================================================
+
+function albaIsOfferExpired(){
+
+  const now =
+    albaGetTrustedNow();
+
+
+  if(now === null){
+
+    return false;
+  }
+
+
+  return (
+    now >=
+    albaGetOfferEnd()
+  );
+
 }
 
 
@@ -2980,128 +3272,238 @@ function albaIsOfferActive(){
 
 function albaOfferDiscount(){
 
-  if(!albaIsOfferActive()){
+  if(
+    !albaIsOfferActive()
+  ){
+
     return 0;
   }
 
-  if(ALBA_OFFER.type !== "extra_discount"){
+
+  if(
+    ALBA_OFFER.type !==
+    "extra_discount"
+  ){
+
     return 0;
   }
+
 
   const subtotal =
     typeof total === "function"
       ? total()
       : 0;
 
+
   if(
     ALBA_OFFER.minOrder > 0 &&
-    subtotal < ALBA_OFFER.minOrder
+    subtotal <
+    ALBA_OFFER.minOrder
   ){
+
     return 0;
   }
 
+
   const percent =
-    Number(ALBA_OFFER.extraDiscountPercent) || 0;
+    Number(
+      ALBA_OFFER.extraDiscountPercent
+    ) || 0;
+
 
   return Math.round(
-    subtotal * percent / 100
+    subtotal *
+    percent /
+    100
   );
+
 }
 
 
 // =====================================================
-// OFFER DELIVERY CHARGE
+// DELIVERY CHARGE
 // =====================================================
 
 function albaGetDeliveryCharge(){
 
-  // Free Delivery Offer
+  // ===================================================
+  // FREE DELIVERY
+  // ===================================================
+
   if(
     albaIsOfferActive() &&
-    ALBA_OFFER.type === "free_delivery"
+    ALBA_OFFER.type ===
+    "free_delivery"
   ){
+
     const subtotal =
       typeof total === "function"
         ? total()
         : 0;
 
+
     if(
       ALBA_OFFER.minOrder <= 0 ||
-      subtotal >= ALBA_OFFER.minOrder
+      subtotal >=
+      ALBA_OFFER.minOrder
     ){
+
       return 0;
     }
+
   }
 
-  // Existing delivery system
+
+  // ===================================================
+  // EXISTING DELIVERY SYSTEM
+  // ===================================================
+
   const area =
-    document.getElementById("deliveryArea")?.value ||
+    document.getElementById(
+      "deliveryArea"
+    )?.value ||
     "dhaka";
 
+
   const weight = 1;
+
 
   const base =
     area === "outside"
       ? 130
       : 70;
 
+
   const extraKg =
     weight > 1
-      ? Math.ceil(weight - 1)
+      ? Math.ceil(
+          weight - 1
+        )
       : 0;
 
-  return base + (extraKg * 20);
+
+  return (
+    base +
+    extraKg * 20
+  );
+
 }
 
 
 // =====================================================
-// COUNTDOWN
+// UPDATE OFFER UI
 // =====================================================
-
-let albaOfferTimer = null;
 
 function albaUpdateOffer(){
 
   const section =
-    document.getElementById("albaFlashOffer");
+    document.getElementById(
+      "albaFlashOffer"
+    );
+
 
   if(!section){
-    return;
-  }
-
-  if(!ALBA_OFFER.enabled){
-
-    section.style.display = "none";
 
     return;
   }
-
-  section.style.display = "";
-
-
-  const deadline =
-    albaGetOfferDeadline();
-
-  const remaining =
-    deadline - Date.now();
 
 
   // ===================================================
-// OFFER EXPIRED
-// ===================================================
+  // OFFER DISABLED
+  // ===================================================
 
-if(remaining <= 0){
+  if(!ALBA_OFFER.enabled){
 
-  clearInterval(albaOfferTimer);
+    section.style.display =
+      "none";
 
-  // অফার শেষ হলে পুরো Offer Layout hide হবে
-  section.style.display = "none";
-
-  return;
-}
+    return;
+  }
 
 
-  section.classList.remove("offer-ended");
+  // ===================================================
+  // TIME NOT SYNCED
+  // ===================================================
+
+  if(!albaTimeSynced){
+
+    // নিরাপত্তার জন্য countdown দেখাবে না
+    // যতক্ষণ trusted time পাওয়া না যায়
+
+    section.style.display =
+      "none";
+
+    return;
+  }
+
+
+  const now =
+    albaGetTrustedNow();
+
+
+  const start =
+    albaGetOfferStart();
+
+
+  const end =
+    albaGetOfferEnd();
+
+
+  // ===================================================
+  // OFFER NOT STARTED
+  // ===================================================
+
+  if(now < start){
+
+    section.style.display =
+      "none";
+
+    return;
+  }
+
+
+  // ===================================================
+  // OFFER EXPIRED
+  // ===================================================
+
+  if(now >= end){
+
+    clearInterval(
+      albaOfferTimer
+    );
+
+
+    section.style.display =
+      "none";
+
+    return;
+  }
+
+
+  // ===================================================
+  // OFFER ACTIVE
+  // ===================================================
+
+  section.style.display =
+    "";
+
+
+  // ===================================================
+  // REMAINING TIME
+  // ===================================================
+
+  const remaining =
+    end -
+    now;
+
+
+  if(remaining <= 0){
+
+    section.style.display =
+      "none";
+
+    return;
+  }
 
 
   // ===================================================
@@ -3109,58 +3511,129 @@ if(remaining <= 0){
   // ===================================================
 
   const totalSeconds =
-    Math.floor(remaining / 1000);
+    Math.floor(
+      remaining /
+      1000
+    );
+
 
   const days =
     Math.floor(
-      totalSeconds / 86400
+      totalSeconds /
+      86400
     );
+
 
   const hours =
     Math.floor(
-      (totalSeconds % 86400) / 3600
+      (
+        totalSeconds %
+        86400
+      ) /
+      3600
     );
+
 
   const minutes =
     Math.floor(
-      (totalSeconds % 3600) / 60
+      (
+        totalSeconds %
+        3600
+      ) /
+      60
     );
 
-  const seconds =
-    totalSeconds % 60;
 
+  const seconds =
+    totalSeconds %
+    60;
+
+
+  // ===================================================
+  // HTML ELEMENTS
+  // ===================================================
 
   const dayEl =
-    document.getElementById("offerDays");
+    document.getElementById(
+      "offerDays"
+    );
+
 
   const hourEl =
-    document.getElementById("offerHours");
+    document.getElementById(
+      "offerHours"
+    );
+
 
   const minuteEl =
-    document.getElementById("offerMinutes");
+    document.getElementById(
+      "offerMinutes"
+    );
+
 
   const secondEl =
-    document.getElementById("offerSeconds");
+    document.getElementById(
+      "offerSeconds"
+    );
 
+
+  // ===================================================
+  // DAYS
+  // ===================================================
 
   if(dayEl){
+
     dayEl.textContent =
-      String(days).padStart(2,"0");
+      String(days)
+        .padStart(
+          2,
+          "0"
+        );
   }
+
+
+  // ===================================================
+  // HOURS
+  // ===================================================
 
   if(hourEl){
+
     hourEl.textContent =
-      String(hours).padStart(2,"0");
+      String(hours)
+        .padStart(
+          2,
+          "0"
+        );
   }
+
+
+  // ===================================================
+  // MINUTES
+  // ===================================================
 
   if(minuteEl){
+
     minuteEl.textContent =
-      String(minutes).padStart(2,"0");
+      String(minutes)
+        .padStart(
+          2,
+          "0"
+        );
   }
 
+
+  // ===================================================
+  // SECONDS
+  // ===================================================
+
   if(secondEl){
+
     secondEl.textContent =
-      String(seconds).padStart(2,"0");
+      String(seconds)
+        .padStart(
+          2,
+          "0"
+        );
   }
 
 
@@ -3169,29 +3642,48 @@ if(remaining <= 0){
   // ===================================================
 
   const title =
-    document.getElementById("offerTitle");
+    document.getElementById(
+      "offerTitle"
+    );
+
 
   const description =
-    document.getElementById("offerDescription");
+    document.getElementById(
+      "offerDescription"
+    );
+
 
   const benefit =
-    document.getElementById("offerBenefit");
+    document.getElementById(
+      "offerBenefit"
+    );
 
 
-  if(ALBA_OFFER.type === "free_delivery"){
+  // ===================================================
+  // FREE DELIVERY
+  // ===================================================
+
+  if(
+    ALBA_OFFER.type ===
+    "free_delivery"
+  ){
 
     if(title){
+
       title.textContent =
-        ALBA_OFFER.durationHours +
-        " ঘণ্টার বিশেষ Free Delivery Offer!";
+        "বিশেষ Free Delivery Offer!";
     }
 
+
     if(description){
+
       description.textContent =
         "অফার শেষ হওয়ার আগেই অর্ডার করুন এবং ডেলিভারি চার্জ ছাড়াই পণ্য নিন।";
     }
 
+
     if(benefit){
+
       benefit.innerHTML =
         "🚚 <strong>FREE DELIVERY</strong>";
     }
@@ -3199,22 +3691,33 @@ if(remaining <= 0){
   }
 
 
-  if(ALBA_OFFER.type === "extra_discount"){
+  // ===================================================
+  // EXTRA DISCOUNT
+  // ===================================================
+
+  if(
+    ALBA_OFFER.type ===
+    "extra_discount"
+  ){
 
     if(title){
+
       title.textContent =
-        ALBA_OFFER.durationHours +
-        " ঘণ্টার বিশেষ ছাড়!";
+        "বিশেষ ছাড়!";
     }
 
+
     if(description){
+
       description.textContent =
         "অফার শেষ হওয়ার আগে অর্ডার করলে অতিরিক্ত " +
         ALBA_OFFER.extraDiscountPercent +
         "% ছাড় পাবেন।";
     }
 
+
     if(benefit){
+
       benefit.innerHTML =
         "🔥 <strong>" +
         ALBA_OFFER.extraDiscountPercent +
@@ -3227,22 +3730,104 @@ if(remaining <= 0){
 
 
 // =====================================================
+// OFFER TIMER
+// =====================================================
+
+let albaOfferTimer =
+  null;
+
+
+// =====================================================
+// START COUNTDOWN
+// =====================================================
+
+function albaStartOfferTimer(){
+
+  clearInterval(
+    albaOfferTimer
+  );
+
+
+  albaUpdateOffer();
+
+
+  albaOfferTimer =
+    setInterval(
+      albaUpdateOffer,
+      250
+    );
+
+}
+
+
+// =====================================================
+// PERIODIC TIME RESYNC
+// =====================================================
+//
+// প্রতি 5 মিনিটে আবার server time নেওয়া হবে।
+// এতে দীর্ঘসময় page খোলা থাকলেও clock drift কম থাকবে।
+//
+// =====================================================
+
+async function albaStartTimeSync(){
+
+  const synced =
+    await albaSyncServerTime();
+
+
+  if(synced){
+
+    albaStartOfferTimer();
+  }
+
+
+  clearInterval(
+    albaTimeSyncTimer
+  );
+
+
+  albaTimeSyncTimer =
+    setInterval(
+      async function(){
+
+        const success =
+          await albaSyncServerTime();
+
+
+        if(success){
+
+          albaUpdateOffer();
+        }
+
+      },
+      5 * 60 * 1000
+    );
+
+}
+
+
+// =====================================================
 // INIT OFFER
 // =====================================================
 
-function albaInitOffer(){
+async function albaInitOffer(){
+
+  const section =
+    document.getElementById(
+      "albaFlashOffer"
+    );
+
 
   // ===================================================
-  // OFFER OFF হলে পুরো Offer Section hide হবে
+  // OFFER OFF
   // ===================================================
 
   if(!ALBA_OFFER.enabled){
 
-    const section =
-      document.getElementById("albaFlashOffer");
-
     if(section){
-      section.style.display = "none";
+
+      section.style.display =
+        "none";
     }
 
     return;
@@ -3250,20 +3835,21 @@ function albaInitOffer(){
 
 
   // ===================================================
-  // OFFER ON
+  // INITIAL HIDE
   // ===================================================
 
-  albaGetOfferDeadline();
+  if(section){
 
-  albaUpdateOffer();
+    section.style.display =
+      "none";
+  }
 
-  clearInterval(albaOfferTimer);
 
-  albaOfferTimer =
-    setInterval(
-      albaUpdateOffer,
-      1000
-    );
+  // ===================================================
+  // GET TRUSTED TIME
+  // ===================================================
+
+  await albaStartTimeSync();
 
 }
 
@@ -3272,7 +3858,10 @@ function albaInitOffer(){
 // START
 // =====================================================
 
-if(document.readyState === "loading"){
+if(
+  document.readyState ===
+  "loading"
+){
 
   document.addEventListener(
     "DOMContentLoaded",
