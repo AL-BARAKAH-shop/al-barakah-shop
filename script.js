@@ -1599,35 +1599,467 @@ function openCheckout(){
   renderCheckout();
 }
 function closeCheckout(e){if(!e||e.target.id==="checkoutOverlay")document.getElementById("checkoutOverlay").classList.remove("show")}
+
+
 function getDeliveryCharge(){
-  const area=document.getElementById("deliveryArea")?.value||"dhaka";
-  const weight=1;
-  const base=area==="outside"?130:70;
-  const extraKg=weight>1?Math.ceil(weight-1):0;
-  return base+(extraKg*20);
+
+  // ================================================
+  // ACTIVE FREE DELIVERY OFFER
+  // ================================================
+
+  if(
+    typeof albaGetDeliveryCharge === "function" &&
+    albaIsOfferActive() &&
+    ALBA_OFFER.type === "free_delivery"
+  ){
+
+    const subtotal =
+      typeof total === "function"
+        ? total()
+        : 0;
+
+    const minimum =
+      Number(ALBA_OFFER.minOrder) || 0;
+
+    if(
+      minimum <= 0 ||
+      subtotal >= minimum
+    ){
+      return 0;
+    }
+  }
+
+
+  // ================================================
+  // NORMAL DELIVERY CHARGE
+  // ================================================
+
+  const area =
+    document.getElementById("deliveryArea")?.value ||
+    "dhaka";
+
+  const weight = 1;
+
+  const base =
+    area === "outside"
+      ? 130
+      : 70;
+
+  const extraKg =
+    weight > 1
+      ? Math.ceil(weight - 1)
+      : 0;
+
+  return base + (extraKg * 20);
 }
+
+
 function renderCheckout(){
-  const d=getDeliveryCharge();
-  document.getElementById("delivery").value=d;
-  const e=document.getElementById("checkoutSummary");
-  const area=document.getElementById("deliveryArea")?.value==="outside"?"ঢাকার বাইরে":"ঢাকার ভেতর";
-  const weight=1;
-  e.innerHTML=cart.map(x=>{let p=products.find(a=>a.id===x.id);return p?`<div><span>${p.name} × ${x.qty}</span><b>${money(currentPrice(p)*x.qty)}</b></div>`:""}).join("")+`<hr><div><b>পণ্য মোট</b><b>${money(total())}</b></div><div><span>ডেলিভারি (${area}, ${weight} কেজি)</span><b>${money(d)}</b></div><div><strong>সর্বমোট</strong><strong>${money(total()+d)}</strong></div>`}
+
+  const d =
+    getDeliveryCharge();
+
+  document.getElementById("delivery").value =
+    d;
+
+
+  const e =
+    document.getElementById("checkoutSummary");
+
+
+  const area =
+    document.getElementById("deliveryArea")?.value === "outside"
+      ? "ঢাকার বাইরে"
+      : "ঢাকার ভেতর";
+
+
+  const weight = 1;
+
+
+  const subtotal =
+    total();
+
+
+  const offerDiscount =
+    typeof albaOfferDiscount === "function"
+      ? albaOfferDiscount()
+      : 0;
+
+
+  const finalSubtotal =
+    Math.max(
+      0,
+      subtotal - offerDiscount
+    );
+
+
+  const offerActive =
+    typeof albaIsOfferActive === "function"
+      ? albaIsOfferActive()
+      : false;
+
+
+  let html =
+    cart.map(x => {
+
+      let p =
+        products.find(
+          a => a.id === x.id
+        );
+
+      return p
+        ? `
+          <div>
+            <span>
+              ${p.name} × ${x.qty}
+            </span>
+
+            <b>
+              ${money(
+                currentPrice(p) * x.qty
+              )}
+            </b>
+          </div>
+        `
+        : "";
+
+    }).join("");
+
+
+  html += `
+    <hr>
+
+    <div>
+      <b>পণ্য মোট</b>
+      <b>${money(subtotal)}</b>
+    </div>
+  `;
+
+
+  // Extra Discount
+  if(offerDiscount > 0){
+
+    html += `
+      <div class="checkout-offer-row">
+        <span>
+          🎁 অফার ছাড়
+        </span>
+
+        <b>
+          -${money(offerDiscount)}
+        </b>
+      </div>
+    `;
+
+  }
+
+
+  // Delivery
+  if(
+    offerActive &&
+    ALBA_OFFER.type === "free_delivery" &&
+    d === 0
+  ){
+
+    html += `
+      <div class="checkout-offer-row">
+        <span>
+          🚚 Free Delivery
+        </span>
+
+        <b>
+          FREE
+        </b>
+      </div>
+    `;
+
+  }else{
+
+    html += `
+      <div>
+        <span>
+          ডেলিভারি (${area}, ${weight} কেজি)
+        </span>
+
+        <b>
+          ${money(d)}
+        </b>
+      </div>
+    `;
+
+  }
+
+
+  const grandTotal =
+    finalSubtotal + d;
+
+
+  html += `
+    <div>
+      <strong>সর্বমোট</strong>
+
+      <strong>
+        ${money(grandTotal)}
+      </strong>
+    </div>
+  `;
+
+
+  e.innerHTML = html;
+}
+
+
 async function saveOrderToGoogleSheet(orderData){
   if(!APPS_SCRIPT_URL)return;
   try{await fetch(APPS_SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(orderData)});}catch(err){console.log("Google Sheet save skipped:",err)}
 }
+
+
+
 async function placeOrder(ev){
-  ev.preventDefault();if(!cart.length)return;
-  let name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.trim(),address=document.getElementById("address").value.trim(),area=document.getElementById("deliveryArea").value,weight=1,d=getDeliveryCharge(),order="ALB-"+Date.now().toString().slice(-8);
-  let items=cart.map(x=>{let p=products.find(a=>a.id===x.id);return {name:p.name,qty:x.qty,lineTotal:money(currentPrice(p)*x.qty)}});
-  const orderData={orderNo:order,name,phone,address,deliveryArea:area,weight,items,subtotal:money(total()),delivery:money(d),grandTotal:money(total()+d)};
-  await saveOrderToGoogleSheet(orderData);
-  let list=items.map(x=>`• ${x.name} × ${x.qty} = ${x.lineTotal}`).join("\n");
-  let areaText=area==="outside"?"ঢাকার বাইরে":"ঢাকার ভেতর";
-  let msg=`🛍️ AL-BARAKAH নতুন অর্ডার\n\nঅর্ডার নং: ${order}\nনাম: ${name}\nমোবাইল: ${phone}\nঠিকানা: ${address}\nডেলিভারি এলাকা: ${areaText}\n\nপণ্য:\n${list}\n\nপণ্যের মোট দাম: ${money(total())}\nডেলিভারি: ${money(d)}\nসর্বমোট: ${money(total()+d)}`;
-  window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`,"_blank");
+
+  ev.preventDefault();
+
+  if(!cart.length){
+    return;
+  }
+
+
+  const name =
+    document.getElementById("name")
+      .value
+      .trim();
+
+  const phone =
+    document.getElementById("phone")
+      .value
+      .trim();
+
+  const address =
+    document.getElementById("address")
+      .value
+      .trim();
+
+  const area =
+    document.getElementById("deliveryArea")
+      .value;
+
+
+  const weight = 1;
+
+
+  const d =
+    getDeliveryCharge();
+
+
+  const subtotal =
+    total();
+
+
+  const offerDiscount =
+    typeof albaOfferDiscount === "function"
+      ? albaOfferDiscount()
+      : 0;
+
+
+  const finalSubtotal =
+    Math.max(
+      0,
+      subtotal - offerDiscount
+    );
+
+
+  const grandTotal =
+    finalSubtotal + d;
+
+
+  const order =
+    "ALB-" +
+    Date.now()
+      .toString()
+      .slice(-8);
+
+
+  // ================================================
+  // PRODUCT LIST
+  // ================================================
+
+  let items =
+    cart.map(x => {
+
+      let p =
+        products.find(
+          a => a.id === x.id
+        );
+
+      return {
+        name:p.name,
+        qty:x.qty,
+
+        lineTotal:
+          money(
+            currentPrice(p) *
+            x.qty
+          )
+      };
+
+    });
+
+
+  // ================================================
+  // OFFER INFO
+  // ================================================
+
+  let offerText = "";
+
+
+  if(
+    albaIsOfferActive() &&
+    ALBA_OFFER.type === "free_delivery" &&
+    d === 0
+  ){
+
+    offerText =
+      "FREE DELIVERY";
+
+  }
+
+
+  if(
+    albaIsOfferActive() &&
+    ALBA_OFFER.type === "extra_discount" &&
+    offerDiscount > 0
+  ){
+
+    offerText =
+      ALBA_OFFER.extraDiscountPercent +
+      "% EXTRA DISCOUNT";
+
+  }
+
+
+  // ================================================
+  // GOOGLE SHEET DATA
+  // ================================================
+
+  const orderData = {
+
+    orderNo:order,
+
+    name:name,
+
+    phone:phone,
+
+    address:address,
+
+    deliveryArea:area,
+
+    weight:weight,
+
+    items:items,
+
+    subtotal:
+      money(subtotal),
+
+    offer:
+      offerText,
+
+    offerDiscount:
+      money(offerDiscount),
+
+    delivery:
+      money(d),
+
+    grandTotal:
+      money(grandTotal)
+
+  };
+
+
+  await saveOrderToGoogleSheet(
+    orderData
+  );
+
+
+  // ================================================
+  // WHATSAPP PRODUCT LIST
+  // ================================================
+
+  let list =
+    items
+      .map(x =>
+        `• ${x.name} × ${x.qty} = ${x.lineTotal}`
+      )
+      .join("\n");
+
+
+  const areaText =
+    area === "outside"
+      ? "ঢাকার বাইরে"
+      : "ঢাকার ভেতর";
+
+
+  // ================================================
+  // OFFER MESSAGE
+  // ================================================
+
+  let offerMessage = "";
+
+
+  if(offerText){
+
+    offerMessage =
+      `\n🎁 অফার: ${offerText}`;
+
+  }
+
+
+  // ================================================
+  // WHATSAPP MESSAGE
+  // ================================================
+
+  let msg =
+`🛍️ AL-BARAKAH নতুন অর্ডার
+
+অর্ডার নং: ${order}
+
+নাম: ${name}
+
+মোবাইল: ${phone}
+
+ঠিকানা: ${address}
+
+ডেলিভারি এলাকা: ${areaText}
+
+পণ্য:
+${list}
+
+পণ্যের মোট দাম: ${money(subtotal)}
+${offerDiscount > 0
+  ? `অফার ছাড়: -${money(offerDiscount)}`
+  : ""}
+${offerMessage}
+
+ডেলিভারি: ${
+  d === 0
+    ? "FREE"
+    : money(d)
 }
+
+সর্বমোট: ${money(grandTotal)}`;
+
+
+  window.open(
+    `https://wa.me/${WHATSAPP}?text=${
+      encodeURIComponent(msg)
+    }`,
+    "_blank"
+  );
+
+}
+
+
+
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeProduct();closeCart();closeCheckout()}if(currentProduct&&document.getElementById("productModal").classList.contains("show")){if(e.key==="ArrowRight")nextProductImage();if(e.key==="ArrowLeft")prevProductImage()}});
 // ===== CUSTOM DESIGN / WHOLESALE =====
 let businessType="custom";
@@ -2445,3 +2877,410 @@ initHeroSlider();
 
 
 })();
+
+
+
+// =====================================================
+// AL-BARAKAH PREMIUM FLASH OFFER SYSTEM
+// =====================================================
+
+const ALBA_OFFER = {
+
+  // true = Offer চালু
+  // false = Offer বন্ধ
+  enabled:true,
+
+  // ===================================================
+  // 24 / 48 / 72 ঘণ্টা
+  // ===================================================
+  durationHours:24,
+
+  // ===================================================
+  // নতুন Campaign শুরু করলে এই ID পরিবর্তন করবে
+  // ===================================================
+  campaignId:"free-delivery-campaign-01",
+
+  // ===================================================
+  // Offer Type
+  //
+  // free_delivery
+  // extra_discount
+  // ===================================================
+  type:"free_delivery",
+
+  // Extra discount চাইলে এখানে %
+  extraDiscountPercent:5,
+
+  // Minimum order amount
+  // 0 = কোনো minimum নেই
+  minOrder:0
+
+};
+
+
+// =====================================================
+// OFFER STORAGE KEY
+// =====================================================
+
+const ALBA_OFFER_STORAGE_KEY =
+  "albarakah_offer_deadline_" +
+  ALBA_OFFER.campaignId;
+
+
+// =====================================================
+// GET / CREATE OFFER DEADLINE
+// =====================================================
+
+function albaGetOfferDeadline(){
+
+  let deadline =
+    Number(
+      localStorage.getItem(
+        ALBA_OFFER_STORAGE_KEY
+      )
+    );
+
+  if(!deadline || deadline <= 0){
+
+    deadline =
+      Date.now() +
+      (ALBA_OFFER.durationHours * 60 * 60 * 1000);
+
+    localStorage.setItem(
+      ALBA_OFFER_STORAGE_KEY,
+      String(deadline)
+    );
+
+  }
+
+  return deadline;
+}
+
+
+// =====================================================
+// OFFER ACTIVE?
+// =====================================================
+
+function albaIsOfferActive(){
+
+  if(!ALBA_OFFER.enabled){
+    return false;
+  }
+
+  const deadline =
+    albaGetOfferDeadline();
+
+  return Date.now() < deadline;
+}
+
+
+// =====================================================
+// OFFER DISCOUNT
+// =====================================================
+
+function albaOfferDiscount(){
+
+  if(!albaIsOfferActive()){
+    return 0;
+  }
+
+  if(ALBA_OFFER.type !== "extra_discount"){
+    return 0;
+  }
+
+  const subtotal =
+    typeof total === "function"
+      ? total()
+      : 0;
+
+  if(
+    ALBA_OFFER.minOrder > 0 &&
+    subtotal < ALBA_OFFER.minOrder
+  ){
+    return 0;
+  }
+
+  const percent =
+    Number(ALBA_OFFER.extraDiscountPercent) || 0;
+
+  return Math.round(
+    subtotal * percent / 100
+  );
+}
+
+
+// =====================================================
+// OFFER DELIVERY CHARGE
+// =====================================================
+
+function albaGetDeliveryCharge(){
+
+  // Free Delivery Offer
+  if(
+    albaIsOfferActive() &&
+    ALBA_OFFER.type === "free_delivery"
+  ){
+    const subtotal =
+      typeof total === "function"
+        ? total()
+        : 0;
+
+    if(
+      ALBA_OFFER.minOrder <= 0 ||
+      subtotal >= ALBA_OFFER.minOrder
+    ){
+      return 0;
+    }
+  }
+
+  // Existing delivery system
+  const area =
+    document.getElementById("deliveryArea")?.value ||
+    "dhaka";
+
+  const weight = 1;
+
+  const base =
+    area === "outside"
+      ? 130
+      : 70;
+
+  const extraKg =
+    weight > 1
+      ? Math.ceil(weight - 1)
+      : 0;
+
+  return base + (extraKg * 20);
+}
+
+
+// =====================================================
+// COUNTDOWN
+// =====================================================
+
+let albaOfferTimer = null;
+
+function albaUpdateOffer(){
+
+  const section =
+    document.getElementById("albaFlashOffer");
+
+  if(!section){
+    return;
+  }
+
+  if(!ALBA_OFFER.enabled){
+
+    section.style.display = "none";
+
+    return;
+  }
+
+  section.style.display = "";
+
+
+  const deadline =
+    albaGetOfferDeadline();
+
+  const remaining =
+    deadline - Date.now();
+
+
+  // ===================================================
+// OFFER EXPIRED
+// ===================================================
+
+if(remaining <= 0){
+
+  clearInterval(albaOfferTimer);
+
+  // অফার শেষ হলে পুরো Offer Layout hide হবে
+  section.style.display = "none";
+
+  return;
+}
+
+
+  section.classList.remove("offer-ended");
+
+
+  // ===================================================
+  // TIME CALCULATION
+  // ===================================================
+
+  const totalSeconds =
+    Math.floor(remaining / 1000);
+
+  const days =
+    Math.floor(
+      totalSeconds / 86400
+    );
+
+  const hours =
+    Math.floor(
+      (totalSeconds % 86400) / 3600
+    );
+
+  const minutes =
+    Math.floor(
+      (totalSeconds % 3600) / 60
+    );
+
+  const seconds =
+    totalSeconds % 60;
+
+
+  const dayEl =
+    document.getElementById("offerDays");
+
+  const hourEl =
+    document.getElementById("offerHours");
+
+  const minuteEl =
+    document.getElementById("offerMinutes");
+
+  const secondEl =
+    document.getElementById("offerSeconds");
+
+
+  if(dayEl){
+    dayEl.textContent =
+      String(days).padStart(2,"0");
+  }
+
+  if(hourEl){
+    hourEl.textContent =
+      String(hours).padStart(2,"0");
+  }
+
+  if(minuteEl){
+    minuteEl.textContent =
+      String(minutes).padStart(2,"0");
+  }
+
+  if(secondEl){
+    secondEl.textContent =
+      String(seconds).padStart(2,"0");
+  }
+
+
+  // ===================================================
+  // OFFER TEXT
+  // ===================================================
+
+  const title =
+    document.getElementById("offerTitle");
+
+  const description =
+    document.getElementById("offerDescription");
+
+  const benefit =
+    document.getElementById("offerBenefit");
+
+
+  if(ALBA_OFFER.type === "free_delivery"){
+
+    if(title){
+      title.textContent =
+        ALBA_OFFER.durationHours +
+        " ঘণ্টার বিশেষ Free Delivery Offer!";
+    }
+
+    if(description){
+      description.textContent =
+        "অফার শেষ হওয়ার আগেই অর্ডার করুন এবং ডেলিভারি চার্জ ছাড়াই পণ্য নিন।";
+    }
+
+    if(benefit){
+      benefit.innerHTML =
+        "🚚 <strong>FREE DELIVERY</strong>";
+    }
+
+  }
+
+
+  if(ALBA_OFFER.type === "extra_discount"){
+
+    if(title){
+      title.textContent =
+        ALBA_OFFER.durationHours +
+        " ঘণ্টার বিশেষ ছাড়!";
+    }
+
+    if(description){
+      description.textContent =
+        "অফার শেষ হওয়ার আগে অর্ডার করলে অতিরিক্ত " +
+        ALBA_OFFER.extraDiscountPercent +
+        "% ছাড় পাবেন।";
+    }
+
+    if(benefit){
+      benefit.innerHTML =
+        "🔥 <strong>" +
+        ALBA_OFFER.extraDiscountPercent +
+        "% EXTRA DISCOUNT</strong>";
+    }
+
+  }
+
+}
+
+
+// =====================================================
+// INIT OFFER
+// =====================================================
+
+function albaInitOffer(){
+
+  // ===================================================
+  // OFFER OFF হলে পুরো Offer Section hide হবে
+  // ===================================================
+
+  if(!ALBA_OFFER.enabled){
+
+    const section =
+      document.getElementById("albaFlashOffer");
+
+    if(section){
+      section.style.display = "none";
+    }
+
+    return;
+  }
+
+
+  // ===================================================
+  // OFFER ON
+  // ===================================================
+
+  albaGetOfferDeadline();
+
+  albaUpdateOffer();
+
+  clearInterval(albaOfferTimer);
+
+  albaOfferTimer =
+    setInterval(
+      albaUpdateOffer,
+      1000
+    );
+
+}
+
+
+// =====================================================
+// START
+// =====================================================
+
+if(document.readyState === "loading"){
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    albaInitOffer
+  );
+
+}else{
+
+  albaInitOffer();
+
+}
