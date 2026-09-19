@@ -915,8 +915,8 @@ const products=[
 	//stock:false,
     name:"Pendant Pin Type Holder",
     cat:"অ্যাক্সেসরিস",
-    price:35,
-    discount:17,
+    price:40,
+    discount:10,
     img:"images/holdar-pin-1.webp",
     images:[
       "images/holdar-pin-1.webp",
@@ -953,8 +953,8 @@ const products=[
 	//stock:false,
     name:"Patch-type pendant holder",
     cat:"অ্যাক্সেসরিস",
-    price:35,
-    discount:17,
+    price:40,
+    discount:10,
     img:"images/holdar-patch-1.webp",
     images:[
       "images/holdar-patch-1.webp",
@@ -972,7 +972,7 @@ const products=[
 	//stock:false,
     name:"AC power cord",
     cat:"অ্যাক্সেসরিস",
-    price:33,
+    price:50,
     discount:17,
     img:"images/ac-power-cord-1.webp",
     images:[
