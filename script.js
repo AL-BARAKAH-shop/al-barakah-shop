@@ -1,3 +1,4 @@
+const IS_PRODUCT_PAGE = /(?:^|\/)product\.html$/i.test(window.location.pathname);
 const WHATSAPP="8801670455526";
 // Google Apps Script Web App URL (your live /exec URL)
 const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbx0RZ50jdoUqitqMlvuOEaxp_8wlepyPLT4Q9jT8UVljVkAc9D3dFxqiJgDyVlEYz0M/exec";
@@ -1489,22 +1490,36 @@ function renderProducts(){
   }).join("")||"<p>কোনো পণ্য পাওয়া যায়নি।</p>"
 }
 function openProduct(id){
-  currentProduct=products.find(x=>x.id===id);
+  const p=products.find(x=>x.id===id);
+  if(!p)return;
+
+  if(!IS_PRODUCT_PAGE){
+    const url="product.html?id="+encodeURIComponent(id);
+    window.location.href=url;
+    return;
+  }
+
+  currentProduct=p;
   currentImage=0;
-  if(!currentProduct)return;
-
-  document.getElementById("productModal").classList.add("show");
   renderProductModal();
-  document.body.classList.add("modal-open");
-
-  albaOpenOverlay("product");
 }
-function closeProduct(e){if(!e||e.target.id==="productModal"){document.getElementById("productModal").classList.remove("show");document.body.classList.remove("modal-open")}}
+function closeProduct(e){
+  if(IS_PRODUCT_PAGE){
+    window.location.href="index.html#products";
+    return;
+  }
+  if(!e||e.target.id==="productModal"){
+    document.getElementById("productModal")?.classList.remove("show");
+    document.body.classList.remove("modal-open");
+  }
+}
 function renderProductModal(){
   if(!currentProduct)return;
   const p=currentProduct;
   document.getElementById("modalImage").src=p.images[currentImage];
   document.getElementById("modalImage").alt=p.name;
+  const photoCount=document.getElementById("photoCount");
+  if(photoCount) photoCount.textContent=(p.images.length||0)+"টি ছবি";
   document.getElementById("modalThumbs").innerHTML=p.images.map((src,i)=>`<button class="thumb-btn ${i===currentImage?'active':''}" onclick="selectProductImage(${i})"><img src="${src}" alt="ছবি ${i+1}"></button>`).join("");
   document.getElementById("modalTitle").textContent=p.name;
   document.getElementById("modalCategory").textContent=p.cat;
@@ -1557,7 +1572,9 @@ function orderNow(id){
   save();
   renderCart();
 
-  closeProduct();
+  if(!IS_PRODUCT_PAGE){
+    closeProduct();
+  }
 
   openCart();
 }
@@ -1651,17 +1668,12 @@ function getDeliveryCharge(){
     ALBA_OFFER.type === "free_delivery"
   ){
 
-    const subtotal =
-      typeof total === "function"
-        ? total()
-        : 0;
-
-    const minimum =
-      Number(ALBA_OFFER.minOrder) || 0;
+    const subtotal = albaEligibleSubtotal();
+    const minimum = Number(ALBA_OFFER.minOrder) || 0;
 
     if(
-      minimum <= 0 ||
-      subtotal >= minimum
+      albaAllCartProductsEligible() &&
+      (minimum <= 0 || subtotal >= minimum)
     ){
       return 0;
     }
@@ -2143,7 +2155,13 @@ function submitBusinessForm(e){
   closeBusinessForm();
 }
 
-document.getElementById("year").textContent=new Date().getFullYear();categories();renderProducts();renderCart();count();
+const yearEl=document.getElementById("year"); if(yearEl) yearEl.textContent=new Date().getFullYear();
+if(!IS_PRODUCT_PAGE){
+  categories();
+  renderProducts();
+  renderCart();
+}
+count();
 
 // ===== V12: AUTO PRODUCT MAIN-IMAGE SLIDER =====
 let heroIndex = 0;
@@ -2952,15 +2970,15 @@ const ALBA_OFFER = {
   // OFFER START AND END TIME
   // Bangladesh Time (UTC +6)
   // ===================================================
-  startTime: "2026-09-19T14:00:00+06:00",
-  endTime:   "2026-09-19T23:00:00+06:00",
+  startTime: "2026-09-20T14:00:00+06:00",
+  endTime:   "2026-09-20T23:00:00+06:00",
 
 
   // ===================================================
   // CAMPAIGN ID
   // নতুন Campaign চালু করলে ID পরিবর্তন করবেন
   // ===================================================
-  campaignId: "free-delivery-campaign-3",
+  campaignId: "free-delivery-campaign-4",
 
 
   // ===================================================
@@ -2968,7 +2986,7 @@ const ALBA_OFFER = {
   // free_delivery
   // extra_discount
   // ===================================================
-  type: "free_delivery",
+  type: "extra_discount",
 
 
   // ===================================================
@@ -2976,6 +2994,15 @@ const ALBA_OFFER = {
   // ===================================================
   extraDiscountPercent: 5,
 
+
+  // ===================================================
+  // OFFER PRODUCT CATEGORIES
+  // এখানে যেসব category দেবেন, অফার শুধু সেই category-এর
+  // product-এর উপর প্রযোজ্য হবে।
+  // [] দিলে সব category-এর product eligible হবে।
+  // উদাহরণ: ["ওয়াল ল্যাম্প", "টেবিল ল্যাম্প"]
+  // ===================================================
+  categories: ["ওয়াল ল্যাম্প", "টেবিল ল্যাম্প", "ডেকোরেটিভ আইটেম", "অ্যাক্সেসরিস", "অর্গানিক ফুড", "প্রসাধনী"],
 
   // ===================================================
   // MINIMUM ORDER
@@ -3267,6 +3294,34 @@ function albaIsOfferExpired(){
 
 
 // =====================================================
+// OFFER PRODUCT CATEGORY FILTER
+// =====================================================
+
+function albaIsOfferProductEligible(p){
+  if(!p) return false;
+  const allowed=Array.isArray(ALBA_OFFER.categories) ? ALBA_OFFER.categories : [];
+  if(allowed.length===0) return true;
+  return allowed.some(cat => String(cat).trim() === String(p.cat || "").trim());
+}
+
+function albaEligibleSubtotal(){
+  if(typeof cart === "undefined" || !Array.isArray(cart)) return 0;
+  return cart.reduce((sum,item)=>{
+    const p=products.find(x=>x.id===item.id);
+    if(!p || !albaIsOfferProductEligible(p)) return sum;
+    return sum + currentPrice(p) * (Number(item.qty)||0);
+  },0);
+}
+
+function albaAllCartProductsEligible(){
+  if(!Array.isArray(cart) || cart.length===0) return false;
+  return cart.every(item=>{
+    const p=products.find(x=>x.id===item.id);
+    return !!p && albaIsOfferProductEligible(p);
+  });
+}
+
+// =====================================================
 // OFFER DISCOUNT
 // =====================================================
 
@@ -3289,10 +3344,7 @@ function albaOfferDiscount(){
   }
 
 
-  const subtotal =
-    typeof total === "function"
-      ? total()
-      : 0;
+  const subtotal = albaEligibleSubtotal();
 
 
   if(
@@ -3336,18 +3388,15 @@ function albaGetDeliveryCharge(){
     "free_delivery"
   ){
 
-    const subtotal =
-      typeof total === "function"
-        ? total()
-        : 0;
+    const subtotal = albaEligibleSubtotal();
 
-
+    // Free Delivery একটি order-level benefit হওয়ায় mixed cart-এ
+    // ineligible product থাকলে এটি দেওয়া হবে না।
     if(
-      ALBA_OFFER.minOrder <= 0 ||
-      subtotal >=
-      ALBA_OFFER.minOrder
+      albaAllCartProductsEligible() &&
+      (ALBA_OFFER.minOrder <= 0 ||
+       subtotal >= ALBA_OFFER.minOrder)
     ){
-
       return 0;
     }
 
@@ -3671,7 +3720,7 @@ function albaUpdateOffer(){
     if(title){
 
       title.textContent =
-        "বিশেষ Free Delivery Offer!";
+        "নির্দিষ্ট পণ্যের Free Delivery Offer!";
     }
 
 
@@ -3703,7 +3752,7 @@ function albaUpdateOffer(){
     if(title){
 
       title.textContent =
-        "বিশেষ ছাড়!";
+        "সকল পণ্যের উপড় বিশেষ ছাড়!";
     }
 
 
