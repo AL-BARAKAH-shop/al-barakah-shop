@@ -103,6 +103,99 @@ body.modal-open{overflow:hidden}
   border-radius:10px;
   background:#fff;
 }
+
+/* Premium product discovery card */
+.premium-discovery-card{
+  position:relative;
+  width:min(1040px,94%);
+  margin:24px auto 0;
+  overflow:hidden;
+  border:1px solid rgba(212,175,55,.35);
+  border-radius:28px;
+  background:
+    radial-gradient(circle at 85% 15%, rgba(212,175,55,.16), transparent 32%),
+    linear-gradient(135deg,#fffdf7 0%,#f8f3e6 48%,#fff 100%);
+  box-shadow:0 18px 50px rgba(82,61,13,.10);
+}
+.premium-discovery-glow{
+  position:absolute;
+  width:220px;
+  height:220px;
+  right:-90px;
+  top:-100px;
+  border-radius:50%;
+  background:rgba(212,175,55,.18);
+  filter:blur(4px);
+  pointer-events:none;
+}
+.premium-discovery-content{
+  position:relative;
+  z-index:1;
+  max-width:820px;
+  margin:0 auto;
+  padding:38px 34px 36px;
+  text-align:center;
+}
+.premium-discovery-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:32px;
+  padding:6px 13px;
+  border:1px solid rgba(212,175,55,.45);
+  border-radius:999px;
+  background:rgba(255,255,255,.72);
+  color:#80620c;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.premium-discovery-content h2{
+  margin:14px auto 10px;
+  color:#30250d;
+  font-size:clamp(22px,3vw,32px);
+  line-height:1.25;
+}
+.premium-discovery-content p{
+  max-width:720px;
+  margin:0 auto 22px;
+  color:#665f50;
+  font-size:15px;
+  line-height:1.85;
+}
+.premium-products-btn{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:50px;
+  padding:13px 23px;
+  border:1px solid rgba(166,129,24,.65);
+  border-radius:15px;
+  background:linear-gradient(135deg,#fffdf7,#f1df9f);
+  color:#654900;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 8px 22px rgba(122,90,0,.14),inset 0 1px 0 rgba(255,255,255,.95);
+  transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+}
+.premium-products-btn:hover{
+  transform:translateY(-2px);
+  border-color:rgba(166,129,24,.9);
+  box-shadow:0 12px 28px rgba(122,90,0,.20),inset 0 1px 0 rgba(255,255,255,1);
+}
+.premium-products-btn:active{transform:translateY(0)}
+@media(max-width:520px){
+  .premium-discovery-card{width:calc(100% - 24px);margin-top:18px;border-radius:22px}
+  .premium-discovery-content{padding:28px 18px 26px}
+  .premium-discovery-content h2{font-size:22px}
+  .premium-discovery-content p{font-size:14px;line-height:1.75}
+  .premium-products-btn{width:100%;min-height:52px}
+}
+
 @media(max-width:850px){
  .hero-grid{grid-template-columns:1fr;gap:28px;padding:48px 0 42px}
  .hero-copy{order:1}.hero-slider{order:2;height:min(78vw,470px);max-height:470px;border-radius:24px}
@@ -1355,4 +1448,33 @@ body.modal-open{overflow:hidden}
     padding: 11px 8px;
   }
 
+}
+
+
+/* =====================================================
+   AL-BARAKAH PRODUCT DETAILS PAGE
+   Reuses the existing product-details UI without overlay.
+===================================================== */
+.product-page{padding:28px 0 80px}
+.product-page-shell{position:relative;width:min(1040px,94%);margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:28px;display:grid;grid-template-columns:1.05fr .95fr;overflow:hidden;box-shadow:0 20px 60px #0000000a}
+.product-page .modal-gallery{padding:28px;background:#faf9f7}
+.product-page .modal-info{max-height:none;overflow:visible;padding:48px 42px 38px}
+.product-page-offer{margin:0 auto 22px;width:min(1160px,92%)}
+.product-page-offer .alba-flash-offer{padding:0}
+.product-page .modal-close{position:absolute;top:16px;right:16px;z-index:8}
+.product-page .modal-actions{display:flex;flex-wrap:wrap;gap:10px}
+.product-page .modal-actions .btn{flex:1 1 180px}
+@media(max-width:850px){
+  .product-page-shell{grid-template-columns:1fr;width:min(680px,94%)}
+  .product-page .modal-info{padding:30px 24px 28px}
+}
+@media(max-width:520px){
+  .product-page{padding:12px 0 55px}
+  .product-page-shell{width:100%;border-radius:0;border-left:0;border-right:0;box-shadow:none}
+  .product-page .modal-gallery{padding:14px}
+  .product-page .modal-info{padding:24px 18px}
+  .product-page .modal-actions{flex-direction:column}
+  .product-page .modal-actions .btn{width:100%;flex:0 0 auto}
+  .product-page-back{width:calc(100% - 24px);margin-bottom:10px}
+  .product-page-offer{width:calc(100% - 24px)}
 }
