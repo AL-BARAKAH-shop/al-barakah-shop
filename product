@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AL-BARAKAH | Product Details</title>
+<meta name="description" content="AL-BARAKAH Product Details">
+<link rel="stylesheet" href="style.css">
+<script>
+(function(){
+  try { history.scrollRestoration = "manual"; } catch(e) {}
+  window.addEventListener("load", function(){ window.scrollTo(0,0); });
+  window.addEventListener("pageshow", function(){ setTimeout(function(){ window.scrollTo(0,0); },0); });
+})();
+</script>
+</head>
+<body>
+<header class="header">
+  <div class="container nav">
+    <a href="index.html" class="brand" aria-label="AL-BARAKAH SHOP"><span class="brand-logo"><img src="images/logo.webp" alt="AL-BARAKAH"></span><span class="brand-copy"><strong>AL-BARAKAH</strong><small>SHOP</small></span></a>
+    <nav><a href="index.html#products">পণ্য</a><a href="index.html#why">কেন আমরা</a><a href="index.html#contact">যোগাযোগ</a></nav>
+    <button class="cart-btn" onclick="openCart()">🛒 <span id="cartCount">0</span></button>
+  </div>
+</header>
+
+<main class="product-page">
+  <!-- Same flash-offer system as the main page -->
+  <div class="product-page-offer">
+    <section class="alba-flash-offer" id="albaFlashOffer">
+      <div class="container">
+        <div class="flash-offer-card">
+          <div class="flash-offer-glow"></div>
+          <div class="flash-offer-content">
+            <div class="flash-offer-badge">🔥 LIMITED TIME OFFER</div>
+            <h2 id="offerTitle">২৪ ঘণ্টার জন্য বিশেষ অফার!</h2>
+            <p id="offerDescription">নির্দিষ্ট সময়ের মধ্যে অর্ডার করলে ডেলিভারি সম্পূর্ণ ফ্রি।</p>
+            <div class="offer-benefit" id="offerBenefit">🚚 <strong>FREE DELIVERY</strong></div>
+            <div class="offer-countdown-title">⏳ অফার শেষ হতে বাকি</div>
+            <div class="offer-countdown">
+              <div class="countdown-box"><strong id="offerDays">00</strong><span>দিন</span></div>
+              <div class="countdown-separator">:</div>
+              <div class="countdown-box"><strong id="offerHours">00</strong><span>ঘণ্টা</span></div>
+              <div class="countdown-separator">:</div>
+              <div class="countdown-box"><strong id="offerMinutes">00</strong><span>মিনিট</span></div>
+              <div class="countdown-separator">:</div>
+              <div class="countdown-box"><strong id="offerSeconds">00</strong><span>সেকেন্ড</span></div>
+            </div>
+            <div class="offer-expired" id="offerExpired">⛔ এই অফারটির সময় শেষ হয়ে গেছে।</div>
+            <a href="index.html#products" class="offer-order-btn" id="offerOrderBtn">🛒 এখনই অর্ডার করুন</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section id="productModal" class="product-page-shell" aria-label="Product Details">
+    <button class="modal-close" type="button" onclick="closeProduct()" aria-label="মেইন পেজে ফিরে যান">✕</button>
+    <div class="modal-gallery">
+      <div class="main-photo-wrap">
+        <button class="gallery-arrow left" onclick="prevProductImage()" aria-label="আগের ছবি">‹</button>
+        <img id="modalImage" class="main-photo" src="images/lamp-01.webp" alt="Product">
+        <button class="gallery-arrow right" onclick="nextProductImage()" aria-label="পরের ছবি">›</button>
+        <span id="photoCount" class="photo-count">৫টি ছবি</span>
+      </div>
+      <div id="modalThumbs" class="modal-thumbs"></div>
+    </div>
+    <div class="modal-info">
+      <span id="modalCategory" class="p-cat"></span>
+      <h2 id="modalTitle"></h2>
+      <div id="modalPrice" class="modal-price"></div>
+      <div id="modalStockStatus" class="modal-stock-status"></div>
+      <div class="detail-heading">পণ্যের বিস্তারিত</div>
+      <p id="modalDesc" class="modal-desc"></p>
+      <div class="detail-heading">বিশেষ বৈশিষ্ট্য</div>
+      <ul id="modalFeatures" class="feature-list"></ul>
+      <div class="modal-actions">
+        <button class="btn ghost" onclick="add(currentProduct.id);if(!IS_PRODUCT_PAGE)closeProduct()">🛒 কার্টে যোগ করুন</button>
+        <button class="btn primary" onclick="orderNow(currentProduct.id)">⚡ অর্ডার করুন</button>
+        <button class="btn whatsapp-btn" onclick="if(currentProduct){window.open('https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent('আমি এই পণ্যটি সম্পর্কে জানতে চাই: '+currentProduct.name+' — '+money(currentPrice(currentProduct))),'_blank')}">💬 WhatsApp</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Premium product discovery card -->
+  <section class="premium-discovery-card" aria-label="আরো প্রিমিয়াম প্রোডাক্ট দেখুন">
+    <div class="premium-discovery-glow"></div>
+    <div class="premium-discovery-content">
+      <span class="premium-discovery-badge">✨ PREMIUM COLLECTION</span>
+      <h2>আপনার পছন্দের মতো আরও প্রিমিয়াম প্রোডাক্ট আবিষ্কার করুন</h2>
+      <p>একটি প্রোডাক্টেই থেমে যাবেন না। AL-BARAKAH-এর আরও সুন্দর, রুচিশীল ও বাছাই করা প্রিমিয়াম প্রোডাক্ট দেখতে আমাদের সম্পূর্ণ কালেকশনে ফিরে আসুন। আপনার পছন্দের পরের প্রোডাক্টটি হয়তো অপেক্ষা করছে আপনার জন্য।</p>
+      <button class="premium-products-btn" type="button" onclick="goToPremiumProducts()">
+        ✨ আমাদের আরো প্রিমিয়াম প্রোডাক্ট দেখুন
+      </button>
+    </div>
+  </section>
+  
+</main>
+
+<!-- Same business-order popup functions remain available on the details page -->
+<div id="businessOverlay" class="overlay business-overlay" onclick="closeBusinessForm(event)">
+ <div class="business-modal" onclick="event.stopPropagation()">
+  <button class="modal-close" type="button" onclick="closeBusinessForm()">✕</button>
+  <span id="businessEyebrow" class="eyebrow">SPECIAL ORDER</span>
+  <h2 id="businessTitle">কাস্টম ডিজাইন</h2>
+  <p id="businessDescription" class="business-description"></p>
+  <form onsubmit="submitBusinessForm(event)">
+   <label>নাম<input id="businessName" required placeholder="আপনার নাম"></label>
+   <label>মোবাইল<input id="businessPhone" required inputmode="tel" placeholder="01XXXXXXXXX"></label>
+   <label id="businessQtyLabel">প্রয়োজনীয় পরিমাণ<input id="businessQty" type="number" min="1" value="1" required></label>
+   <label>আপনার প্রয়োজন<textarea id="businessDetails" required placeholder="আপনার ডিজাইন/অর্ডারের প্রয়োজনীয় তথ্য লিখুন..."></textarea></label>
+   <button class="btn primary full business-submit" type="submit">💬 WhatsApp-এ বিস্তারিত পাঠান</button>
+  </form>
+ </div>
+</div>
+
+<div id="cartOverlay" class="overlay" onclick="closeCart(event)"><aside class="drawer" onclick="event.stopPropagation()">
+ <div class="drawer-top"><h2>আপনার কার্ট</h2><button onclick="closeCart()">✕</button></div>
+ <div id="cartItems"></div>
+ <div class="total"><span>পণ্য মোট</span><b id="cartTotal">৳0</b></div>
+ <button class="btn primary full" onclick="openCheckout()">Checkout করুন</button>
+</aside></div>
+
+<div id="checkoutOverlay" class="overlay" onclick="closeCheckout(event)"><div class="checkout" onclick="event.stopPropagation()">
+ <button class="close" onclick="closeCheckout()">✕</button>
+ <span class="eyebrow">CHECKOUT</span><h2>অর্ডার কনফার্ম করুন</h2>
+ <form onsubmit="placeOrder(event)">
+  <label>নাম<input id="name" required placeholder="আপনার নাম"></label>
+  <label>মোবাইল<input id="phone" required inputmode="tel" placeholder="01XXXXXXXXX"></label>
+  <label>সম্পূর্ণ ঠিকানা<textarea id="address" required placeholder="বাড়ি/রোড, এলাকা, থানা, জেলা"></textarea></label>
+  <label>ডেলিভারি এলাকা
+   <select id="deliveryArea" onchange="renderCheckout()" required>
+    <option value="dhaka">ঢাকার ভেতর — ৳70</option>
+    <option value="outside">ঢাকার বাইরে — ৳130</option>
+   </select>
+  </label>
+  <input id="weight" type="hidden" value="1">
+  <div class="delivery-note">📦 <b>ডেলিভারি চার্জ:</b> ঢাকার ভেতর ৳70 এবং ঢাকার বাইরে ৳130। ১ কেজির বেশি হলে প্রতি অতিরিক্ত কেজিতে ৳20 করে যোগ হবে।</div>
+  <input id="delivery" type="hidden" value="70">
+  <div id="checkoutSummary" class="summary"></div>
+  <button class="btn primary full" type="submit">📱 অর্ডার কনফার্ম করুন</button>
+ </form>
+</div></div>
+
+
+<section class="alba-special-services" id="special-services">
+  <div class="container">
+    <div class="special-services-head">
+      <span class="special-kicker">AL-BARAKAH</span>
+      <h2>AL-BARAKAH বিশেষ সেবা</h2>
+      <p>আপনার প্রয়োজন অনুযায়ী কাস্টম ডিজাইন ও পাইকারি অর্ডার নিয়ে সরাসরি কথা বলুন।</p>
+    </div>
+    <div class="special-services-grid">
+      <button class="special-service-card custom-card" type="button" onclick="openBusinessForm('custom')">
+        <span class="special-service-icon">🎨</span>
+        <span class="special-service-content">
+          <strong>কাস্টম ডিজাইন</strong>
+          <span>আপনার পছন্দের লেখা, নাম, লোগো বা ডিজাইন দিয়ে বিশেষ অর্ডার করতে কথা বলুন।</span>
+        </span>
+        <span class="special-service-arrow">→</span>
+      </button>
+      <button class="special-service-card wholesale-card" type="button" onclick="openBusinessForm('wholesale')">
+        <span class="special-service-icon">📦</span>
+        <span class="special-service-content">
+          <strong>পাইকারি অর্ডার</strong>
+          <span>বেশি পরিমাণে অর্ডার করতে চাইলে পরিমাণ ও প্রয়োজন জানিয়ে WhatsApp-এ যোগাযোগ করুন।</span>
+        </span>
+        <span class="special-service-arrow">→</span>
+      </button>
+    </div>
+  </div>
+  
+  
+</section>
+
+
+<footer id="contact"><div class="container footer">
+ <img src="images/logo.webp" alt="AL-BARAKAH"><p>প্রশান্তিময় আলোর ছোঁয়া • Premium Quality</p>
+ <a href="https://wa.me/8801670455526" target="_blank">WhatsApp: 01670455526</a>
+ <small>© <span id="year"></span> AL-BARAKAH. All rights reserved.</small>
+</div></footer>
+
+<script src="script.js"></script>
+<script>
+(function(){
+  function init(){
+    const params=new URLSearchParams(window.location.search);
+    const id=Number(params.get('id'));
+    const p=products.find(x=>x.id===id);
+    if(!p){ window.location.href='index.html#products'; return; }
+    currentProduct=p;
+    currentImage=0;
+    renderProductModal();
+    renderCart();
+    count();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
+<script>
+(function(){
+  const MAIN_PAGE = "index.html#products";
+
+  // Create a dedicated history entry so a shared/direct product URL
+  // also returns to the shop homepage when the browser Back button is used.
+  try {
+    const currentUrl = window.location.href;
+    history.replaceState({ albaProductPage: true }, "", currentUrl);
+    history.pushState({ albaProductBackEntry: true }, "", currentUrl);
+  } catch (e) {
+    console.warn("AL-BARAKAH product history setup failed:", e);
+  }
+
+  window.addEventListener("popstate", function(){
+    window.location.replace(MAIN_PAGE);
+  });
+
+  window.goToPremiumProducts = function(){
+    window.location.replace(MAIN_PAGE);
+  };
+})();
+</script>
+</body>
+</html>
