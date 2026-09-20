@@ -14,7 +14,8 @@
 })();
 </script>
 </head>
-<body>
+<body class="product-details-page">
+<div class="product-scroll-view">
 <header class="header">
   <div class="container nav">
     <a href="index.html" class="brand" aria-label="AL-BARAKAH SHOP"><span class="brand-logo"><img src="images/logo.webp" alt="AL-BARAKAH"></span><span class="brand-copy"><strong>AL-BARAKAH</strong><small>SHOP</small></span></a>
@@ -54,7 +55,6 @@
   </div>
 
   <section id="productModal" class="product-page-shell" aria-label="Product Details">
-    <button class="modal-close" type="button" onclick="closeProduct()" aria-label="মেইন পেজে ফিরে যান">✕</button>
     <div class="modal-gallery">
       <div class="main-photo-wrap">
         <button class="gallery-arrow left" onclick="prevProductImage()" aria-label="আগের ছবি">‹</button>
@@ -96,6 +96,45 @@
   
 </main>
 
+<section class="alba-special-services" id="special-services">
+  <div class="container">
+    <div class="special-services-head">
+      <span class="special-kicker">AL-BARAKAH</span>
+      <h2>AL-BARAKAH বিশেষ সেবা</h2>
+      <p>আপনার প্রয়োজন অনুযায়ী কাস্টম ডিজাইন ও পাইকারি অর্ডার নিয়ে সরাসরি কথা বলুন।</p>
+    </div>
+    <div class="special-services-grid">
+      <button class="special-service-card custom-card" type="button" onclick="openBusinessForm('custom')">
+        <span class="special-service-icon">🎨</span>
+        <span class="special-service-content">
+          <strong>কাস্টম ডিজাইন</strong>
+          <span>আপনার পছন্দের লেখা, নাম, লোগো বা ডিজাইন দিয়ে বিশেষ অর্ডার করতে কথা বলুন।</span>
+        </span>
+        <span class="special-service-arrow">→</span>
+      </button>
+      <button class="special-service-card wholesale-card" type="button" onclick="openBusinessForm('wholesale')">
+        <span class="special-service-icon">📦</span>
+        <span class="special-service-content">
+          <strong>পাইকারি অর্ডার</strong>
+          <span>বেশি পরিমাণে অর্ডার করতে চাইলে পরিমাণ ও প্রয়োজন জানিয়ে WhatsApp-এ যোগাযোগ করুন।</span>
+        </span>
+        <span class="special-service-arrow">→</span>
+      </button>
+    </div>
+  </div>
+  
+  
+</section>
+
+
+<footer id="contact"><div class="container footer">
+ <img src="images/logo.webp" alt="AL-BARAKAH"><p>প্রশান্তিময় আলোর ছোঁয়া • Premium Quality</p>
+ <a href="https://wa.me/8801670455526" target="_blank">WhatsApp: 01670455526</a>
+ <small>© <span id="year"></span> AL-BARAKAH. All rights reserved.</small>
+</div></footer>
+
+</div>
+
 <!-- Same business-order popup functions remain available on the details page -->
 <div id="businessOverlay" class="overlay business-overlay" onclick="closeBusinessForm(event)">
  <div class="business-modal" onclick="event.stopPropagation()">
@@ -133,6 +172,25 @@
     <option value="outside">ঢাকার বাইরে — ৳130</option>
    </select>
   </label>
+  
+  <!-- PAYMENT METHOD -->
+<fieldset class="payment-method">
+  <legend>পেমেন্ট পদ্ধতি</legend>
+
+  <label class="payment-option">
+    <input
+      type="radio"
+      name="paymentMethod"
+      value="cod"
+      required
+    >
+    <span>
+      <strong>💵 Cash on Delivery</strong>
+      <small>পণ্য হাতে পাওয়ার সময় টাকা পরিশোধ করুন</small>
+    </span>
+  </label>
+</fieldset>
+  
   <input id="weight" type="hidden" value="1">
   <div class="delivery-note">📦 <b>ডেলিভারি চার্জ:</b> ঢাকার ভেতর ৳70 এবং ঢাকার বাইরে ৳130। ১ কেজির বেশি হলে প্রতি অতিরিক্ত কেজিতে ৳20 করে যোগ হবে।</div>
   <input id="delivery" type="hidden" value="70">
@@ -142,42 +200,7 @@
 </div></div>
 
 
-<section class="alba-special-services" id="special-services">
-  <div class="container">
-    <div class="special-services-head">
-      <span class="special-kicker">AL-BARAKAH</span>
-      <h2>AL-BARAKAH বিশেষ সেবা</h2>
-      <p>আপনার প্রয়োজন অনুযায়ী কাস্টম ডিজাইন ও পাইকারি অর্ডার নিয়ে সরাসরি কথা বলুন।</p>
-    </div>
-    <div class="special-services-grid">
-      <button class="special-service-card custom-card" type="button" onclick="openBusinessForm('custom')">
-        <span class="special-service-icon">🎨</span>
-        <span class="special-service-content">
-          <strong>কাস্টম ডিজাইন</strong>
-          <span>আপনার পছন্দের লেখা, নাম, লোগো বা ডিজাইন দিয়ে বিশেষ অর্ডার করতে কথা বলুন।</span>
-        </span>
-        <span class="special-service-arrow">→</span>
-      </button>
-      <button class="special-service-card wholesale-card" type="button" onclick="openBusinessForm('wholesale')">
-        <span class="special-service-icon">📦</span>
-        <span class="special-service-content">
-          <strong>পাইকারি অর্ডার</strong>
-          <span>বেশি পরিমাণে অর্ডার করতে চাইলে পরিমাণ ও প্রয়োজন জানিয়ে WhatsApp-এ যোগাযোগ করুন।</span>
-        </span>
-        <span class="special-service-arrow">→</span>
-      </button>
-    </div>
-  </div>
-  
-  
-</section>
 
-
-<footer id="contact"><div class="container footer">
- <img src="images/logo.webp" alt="AL-BARAKAH"><p>প্রশান্তিময় আলোর ছোঁয়া • Premium Quality</p>
- <a href="https://wa.me/8801670455526" target="_blank">WhatsApp: 01670455526</a>
- <small>© <span id="year"></span> AL-BARAKAH. All rights reserved.</small>
-</div></footer>
 
 <script src="script.js"></script>
 <script>
@@ -219,5 +242,43 @@
   };
 })();
 </script>
+
+<script>
+/* =========================================================
+   CASH ON DELIVERY — REQUIRED CHECKOUT PAYMENT METHOD
+   ========================================================= */
+
+(function () {
+  const checkoutForm = document.querySelector(
+    '#checkoutOverlay form[onsubmit="placeOrder(event)"]'
+  );
+
+  if (!checkoutForm) return;
+
+  checkoutForm.addEventListener('submit', function (event) {
+    const selectedPayment = checkoutForm.querySelector(
+      'input[name="paymentMethod"]:checked'
+    );
+
+    if (!selectedPayment || selectedPayment.value !== 'cod') {
+      event.preventDefault();
+
+      alert('⚠️ অর্ডার কনফার্ম করতে অবশ্যই Cash on Delivery নির্বাচন করুন।');
+
+      const paymentBox = checkoutForm.querySelector('.payment-method');
+
+      if (paymentBox) {
+        paymentBox.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+
+      return false;
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
