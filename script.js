@@ -1526,6 +1526,57 @@ function renderProductModal(){
   document.getElementById("modalPrice").innerHTML=priceHTML(p); const modalStock=document.getElementById("modalStockStatus"); if(modalStock) modalStock.innerHTML=stockStatusHTML(p); const modalBtns=document.querySelectorAll("#productModal .modal-actions .btn"); if(modalBtns.length>=2){ modalBtns[0].disabled=isStockOut(p); modalBtns[1].disabled=isStockOut(p); modalBtns[0].setAttribute("aria-disabled",isStockOut(p)); modalBtns[1].setAttribute("aria-disabled",isStockOut(p)); }
   document.getElementById("modalDesc").textContent=p.desc;
   document.getElementById("modalFeatures").innerHTML=p.features.map(f=>`<li>✓ ${f}</li>`).join("");
+  renderRelatedProducts();
+}
+
+function renderRelatedProducts(){
+  const section=document.getElementById("relatedProductsSection");
+  const grid=document.getElementById("relatedProductsGrid");
+  const title=document.getElementById("relatedProductsTitle");
+  const subtitle=document.getElementById("relatedProductsSubtitle");
+
+  if(!section || !grid || !currentProduct){
+    return;
+  }
+
+  const related=products.filter(x =>
+    x.cat === currentProduct.cat &&
+    x.id !== currentProduct.id
+  );
+
+  // If there are no other products in this category, keep the page unchanged.
+  if(!related.length){
+    section.style.display="none";
+    return;
+  }
+
+  section.style.display="";
+  title.textContent=`${currentProduct.cat} — আরও পণ্য`;
+  subtitle.textContent=`${currentProduct.cat} ক্যাটাগরির আরও ${related.length}টি পণ্য দেখুন।`;
+
+  grid.innerHTML=related.map(x=>{
+    const out=isStockOut(x);
+
+    return `<article class="product related-product-card ${out?'is-stock-out':''}" onclick="openProduct(${x.id})">
+      <div class="pimg">
+        <img src="${x.img}" alt="${x.name}" loading="lazy">
+        <span class="view-badge">${money(discountAmount(x))} SAVE</span>
+      </div>
+      <div class="pinfo">
+        <span class="p-cat">${x.cat}</span>
+        <h3>${x.name}</h3>
+        <p>${x.short}</p>
+        <div class="product-bottom">
+          <div class="stock-row">${stockStatusHTML(x)}</div>
+          ${priceHTML(x)}
+          <div class="product-actions">
+            <button class="add" ${out?'disabled aria-disabled="true"':''} onclick="event.stopPropagation();${out?'':'add('+x.id+')'}">🛒 কার্ট +</button>
+            <button class="add order-btn" ${out?'disabled aria-disabled="true"':''} onclick="event.stopPropagation();${out?'':'orderNow('+x.id+')'}">⚡ অর্ডার করুন</button>
+          </div>
+        </div>
+      </div>
+    </article>`;
+  }).join("");
 }
 function selectProductImage(i){currentImage=i;renderProductModal()}
 function nextProductImage(){if(!currentProduct)return;currentImage=(currentImage+1)%currentProduct.images.length;renderProductModal()}
