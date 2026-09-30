@@ -30,10 +30,27 @@
 <header class="header">
   <div class="container nav">
     <a href="#" class="brand" aria-label="AL-BARAKAH SHOP"><span class="brand-logo"><img src="images/logo.webp" alt="AL-BARAKAH"></span><span class="brand-copy"><strong>AL-BARAKAH</strong><small>SHOP</small></span></a>
-    <nav><a href="#products">পণ্য</a><a href="#why">কেন আমরা</a><a href="#contact">যোগাযোগ</a></nav>
-    <button class="cart-btn" onclick="openCart()">🛒 <span id="cartCount">0</span></button>
+    <nav class="desktop-nav"><a href="#products">পণ্য</a><a href="#why">কেন আমরা</a><a href="#contact">যোগাযোগ</a></nav>
+    <div class="nav-actions">
+      <button class="cart-btn" onclick="openCart()">🛒 <span id="cartCount">0</span></button>
+      <button class="mobile-menu-btn" type="button" onclick="toggleMobileMenu()" aria-label="মেনু খুলুন" aria-expanded="false">☰</button>
+    </div>
   </div>
 </header>
+
+<div id="mobileMenuOverlay" class="mobile-menu-overlay" onclick="closeMobileMenu(event)">
+  <aside class="mobile-menu-panel" onclick="event.stopPropagation()">
+    <div class="mobile-menu-top">
+      <span>AL-BARAKAH</span>
+      <button type="button" onclick="closeMobileMenu()">✕</button>
+    </div>
+    <div class="mobile-menu-links">
+      <a href="#products" onclick="closeMobileMenu()">🛍️ <span>পণ্যসমূহ</span></a>
+      <a href="#why" onclick="closeMobileMenu()">✨ <span>কেন আমরা</span></a>
+      <a href="#contact" onclick="closeMobileMenu()">💬 <span>যোগাযোগ</span></a>
+    </div>
+  </aside>
+</div>
 
 
 
@@ -141,12 +158,29 @@
 
 
 <main class="container">
- <section class="section-head" id="products">
-   <div><span class="eyebrow">OUR COLLECTION</span><h2>আমাদের জনপ্রিয় আইটেম সমূহ...</h2></div>
-   <input id="search" oninput="renderProducts()" placeholder="🔎 এখানে খুঁজুন...">
+ <section class="collection-area" id="products">
+
+   <div class="category-panel">
+     <div class="category-panel-head">
+       <div>
+         <span class="category-kicker">SHOP BY CATEGORY</span>
+         <h2>ক্যাটাগরি সমূহ</h2>
+       </div>
+       <span class="category-count-badge">সব পণ্য একসাথে দেখুন</span>
+     </div>
+     <div id="categories" class="categories"></div>
+   </div>
+
+   <section class="section-head collection-head">
+     <div>
+       <span class="eyebrow">OUR COLLECTION</span>
+       <h2>আমাদের জনপ্রিয় আইটেম সমূহ...</h2>
+     </div>
+     <input id="search" oninput="renderProducts()" placeholder="🔎 এখানে খুঁজুন...">
+   </section>
+
+   <div id="productGrid" class="products"></div>
  </section>
- <div id="categories" class="categories"></div>
- <div id="productGrid" class="products"></div>
 
 
 <section class="alba-special-services" id="special-services">
