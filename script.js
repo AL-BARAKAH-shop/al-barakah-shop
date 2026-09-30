@@ -1557,7 +1557,7 @@ function renderRelatedProducts(){
   grid.innerHTML=related.map(x=>{
     const out=isStockOut(x);
 
-    return `<article class="product related-product-card ${out?'is-stock-out':''}" onclick="openProduct(${x.id})">
+    return `<article class="product related-product-card ${out?'is-stock-out':''}" onclick="window.location.href='product.html?id=${encodeURIComponent(x.id)}'">
       <div class="pimg">
         <img src="${x.img}" alt="${x.name}" loading="lazy">
         <span class="view-badge">${money(discountAmount(x))} SAVE</span>
@@ -3973,3 +3973,29 @@ if(
   albaInitOffer();
 
 }
+
+
+/* ===== AL-BARAKAH MOBILE MENU — UI ONLY ===== */
+function toggleMobileMenu(){
+  const overlay=document.getElementById("mobileMenuOverlay");
+  const btn=document.querySelector(".mobile-menu-btn");
+  if(!overlay)return;
+  const show=!overlay.classList.contains("show");
+  overlay.classList.toggle("show",show);
+  document.body.classList.toggle("mobile-menu-open",show);
+  if(btn) btn.setAttribute("aria-expanded",show?"true":"false");
+}
+
+function closeMobileMenu(e){
+  if(e && e.target && e.target.id!=="mobileMenuOverlay") return;
+  const overlay=document.getElementById("mobileMenuOverlay");
+  const btn=document.querySelector(".mobile-menu-btn");
+  if(!overlay)return;
+  overlay.classList.remove("show");
+  document.body.classList.remove("mobile-menu-open");
+  if(btn) btn.setAttribute("aria-expanded","false");
+}
+
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape") closeMobileMenu();
+});
