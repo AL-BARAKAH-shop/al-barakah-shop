@@ -1151,6 +1151,47 @@ function scrollActiveCategoryIntoView(){
 
   }
 }
+function categoryImage(cat){
+  const item = cat === "সব"
+    ? products[0]
+    : products.find(x => x.cat === cat);
+  return item && (item.img || (item.images && item.images[0]))
+    ? (item.img || item.images[0])
+    : "images/logo.webp";
+}
+
+function goToCategory(cat){
+  closeMobileMenu();
+  if(IS_PRODUCT_PAGE){
+    window.location.href = "index.html?category=" + encodeURIComponent(cat) + "#products";
+    return;
+  }
+  const search = new URLSearchParams(window.location.search);
+  search.set("category", cat);
+  const newUrl = window.location.pathname + "?" + search.toString() + "#products";
+  history.replaceState(null, "", newUrl);
+  active = cat;
+  categories();
+  renderProducts();
+  document.getElementById("products")?.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function renderMenuCategories(){
+  const menu = document.getElementById("menuCategoryLinks");
+  if(!menu) return;
+
+  const categoryList = ["সব", ...new Set(products.map(x => x.cat))];
+
+  menu.innerHTML = categoryList.map(cat => `
+    <button type="button"
+      class="menu-category-card ${cat === active ? "active" : ""}"
+      onclick='goToCategory(${JSON.stringify(cat)})'>
+      <img src="${categoryImage(cat)}" alt="${cat}" loading="lazy">
+      <span>${cat}</span>
+    </button>
+  `).join("");
+}
+
 function categories(){
 
   const original = document.getElementById("categories");
@@ -1401,10 +1442,13 @@ function categories(){
         `<button class="cat ${
           x === active ? "active" : ""
         }"
-        onclick="setCat('${x}')">
-          ${x}
+        onclick='setCat(${JSON.stringify(x)})'>
+          <img class="cat-image" src="${categoryImage(x)}" alt="${x}" loading="lazy">
+          <span class="cat-name">${x}</span>
         </button>`
     ).join("");
+
+  renderMenuCategories();
 
 
   // =====================================================
@@ -1447,7 +1491,12 @@ function categories(){
   }
 
 }
-function setCat(x){active=x;categories();renderProducts()}
+function setCat(x){
+  active=x;
+  categories();
+  renderProducts();
+  renderMenuCategories();
+}
 function isStockOut(p){
   const s=p && p.stock;
   return s===false || s===0 || String(s).trim().toLowerCase() === "out" ||
@@ -2208,9 +2257,15 @@ function submitBusinessForm(e){
 
 const yearEl=document.getElementById("year"); if(yearEl) yearEl.textContent=new Date().getFullYear();
 if(!IS_PRODUCT_PAGE){
+  const requestedCategory = new URLSearchParams(window.location.search).get("category");
+  if(requestedCategory && products.some(x => x.cat === requestedCategory)){
+    active = requestedCategory;
+  }
   categories();
   renderProducts();
   renderCart();
+} else {
+  renderMenuCategories();
 }
 count();
 
