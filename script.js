@@ -1,7 +1,7 @@
 const IS_PRODUCT_PAGE = /(?:^|\/)product\.html$/i.test(window.location.pathname);
 const WHATSAPP="8801670455526";
 // Google Apps Script Web App URL (your live /exec URL)
-const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbx0RZ50jdoUqitqMlvuOEaxp_8wlepyPLT4Q9jT8UVljVkAc9D3dFxqiJgDyVlEYz0M/exec";
+const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbwve7BtdnB-pAt-p2uQrpykl7sjlyRVCRk3dv8xLzyGnvBkQU8Qa56kR5wvklhAk9OI/exec";
 
 const galleryImages=[  
   
@@ -1952,271 +1952,152 @@ function renderCheckout(){
 
 
 async function saveOrderToGoogleSheet(orderData){
-  if(!APPS_SCRIPT_URL)return;
-  try{await fetch(APPS_SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(orderData)});}catch(err){console.log("Google Sheet save skipped:",err)}
+  if(!APPS_SCRIPT_URL){
+    throw new Error("Order backend URL is not configured.");
+  }
+
+  const response = await fetch(APPS_SCRIPT_URL,{
+    method:"POST",
+    mode:"no-cors",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(orderData)
+  });
+
+  // no-cors returns an opaque response by design. A resolved fetch means the
+  // browser successfully handed the request to the configured endpoint.
+  return response;
 }
 
 
 
 async function placeOrder(ev){
-
   ev.preventDefault();
 
-  if(!cart.length){
+  if(!cart || !cart.length){
+    alert("আগে একটি পণ্য কার্টে যোগ করুন।");
     return;
   }
 
+  const form = ev.target;
+  const submitBtn = form?.querySelector('button[type="submit"]');
+  if(submitBtn?.dataset.submitting === "1") return;
 
-  const name =
-    document.getElementById("name")
-      .value
-      .trim();
+  const name = document.getElementById("name")?.value.trim() || "";
+  const phone = document.getElementById("phone")?.value.trim() || "";
+  const address = document.getElementById("address")?.value.trim() || "";
+  const area = document.getElementById("deliveryArea")?.value || "dhaka";
+  const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || "cod";
 
-  const phone =
-    document.getElementById("phone")
-      .value
-      .trim();
-
-  const address =
-    document.getElementById("address")
-      .value
-      .trim();
-
-  const area =
-    document.getElementById("deliveryArea")
-      .value;
-
+  if(!name || !phone || !address){
+    alert("অনুগ্রহ করে প্রয়োজনীয় তথ্যগুলো পূরণ করুন।");
+    return;
+  }
 
   const weight = 1;
+  const d = getDeliveryCharge();
+  const subtotal = total();
+  const offerDiscount = typeof albaOfferDiscount === "function" ? albaOfferDiscount() : 0;
+  const finalSubtotal = Math.max(0, subtotal - offerDiscount);
+  const grandTotal = finalSubtotal + d;
+  const order = "ALB-" + Date.now().toString().slice(-8);
 
+  if(
+    typeof ALBA_OFFER !== "undefined" &&
+    ALBA_OFFER.enabled &&
+    typeof albaEnsureTimeSynced === "function" &&
+    !albaTimeSynced
+  ){
+    const synced = await albaEnsureTimeSynced();
+    if(!synced){
+      alert("অফারের সময় যাচাই করা যাচ্ছে না। ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।");
+      return;
+    }
+  }
 
-  const d =
-    getDeliveryCharge();
-
-
-  const subtotal =
-    total();
-
-
-  const offerDiscount =
-    typeof albaOfferDiscount === "function"
-      ? albaOfferDiscount()
-      : 0;
-
-
-  const finalSubtotal =
-    Math.max(
-      0,
-      subtotal - offerDiscount
-    );
-
-
-  const grandTotal =
-    finalSubtotal + d;
-
-
-  const order =
-    "ALB-" +
-    Date.now()
-      .toString()
-      .slice(-8);
-
-
-  // ================================================
-  // PRODUCT LIST
-  // ================================================
-
-  let items =
-    cart.map(x => {
-
-      let p =
-        products.find(
-          a => a.id === x.id
-        );
-
-      return {
-        name:p.name,
-        qty:x.qty,
-
-        lineTotal:
-          money(
-            currentPrice(p) *
-            x.qty
-          )
-      };
-
-    });
-
-
-  // ================================================
-  // OFFER INFO
-  // ================================================
+  const items = cart.map(x => {
+    const p = products.find(a => a.id === x.id);
+    return {
+      id: p?.id || x.id,
+      name: p?.name || "Unknown Product",
+      category: p?.cat || "",
+      qty: x.qty,
+      unitPrice: Number(p ? currentPrice(p) : 0),
+      lineTotal: Number(p ? currentPrice(p) * x.qty : 0)
+    };
+  });
 
   let offerText = "";
-
-
-  if(
-    albaIsOfferActive() &&
-    ALBA_OFFER.type === "free_delivery" &&
-    d === 0
-  ){
-
-    offerText =
-      "FREE DELIVERY";
-
+  if(typeof albaIsOfferActive === "function" && albaIsOfferActive() && typeof ALBA_OFFER !== "undefined"){
+    if(ALBA_OFFER.type === "free_delivery" && d === 0) offerText = "FREE DELIVERY";
+    if(ALBA_OFFER.type === "extra_discount" && offerDiscount > 0){
+      offerText = (ALBA_OFFER.extraDiscountPercent || "") + "% EXTRA DISCOUNT";
+    }
   }
-
-
-  if(
-    albaIsOfferActive() &&
-    ALBA_OFFER.type === "extra_discount" &&
-    offerDiscount > 0
-  ){
-
-    offerText =
-      ALBA_OFFER.extraDiscountPercent +
-      "% EXTRA DISCOUNT";
-
-  }
-
-
-  // ================================================
-  // GOOGLE SHEET DATA
-  // ================================================
 
   const orderData = {
-
-    orderNo:order,
-
-    name:name,
-
-    phone:phone,
-
-    address:address,
-
-    deliveryArea:area,
-
-    weight:weight,
-
-    items:items,
-
-    subtotal:
-      money(subtotal),
-
-    offer:
-      offerText,
-
-    offerDiscount:
-      money(offerDiscount),
-
-    delivery:
-      money(d),
-
-    grandTotal:
-      money(grandTotal)
-
+    orderNo: order,
+    orderTime: new Date().toISOString(),
+    name,
+    phone,
+    address,
+    deliveryArea: area,
+    paymentMethod,
+    weight,
+    items,
+    subtotal,
+    offer: offerText,
+    offerDiscount,
+    delivery: d,
+    grandTotal,
+    source: "AL-BARAKAH Website"
   };
 
-
-  await saveOrderToGoogleSheet(
-    orderData
-  );
-
-
-  // ================================================
-  // WHATSAPP PRODUCT LIST
-  // ================================================
-
-  let list =
-    items
-      .map(x =>
-        `• ${x.name} × ${x.qty} = ${x.lineTotal}`
-      )
-      .join("\n");
-
-
-  const areaText =
-    area === "outside"
-      ? "ঢাকার বাইরে"
-      : "ঢাকার ভেতর";
-
-
-  // ================================================
-  // OFFER MESSAGE
-  // ================================================
-
-  let offerMessage = "";
-
-
-  if(offerText){
-
-    offerMessage =
-      `\n🎁 অফার: ${offerText}`;
-
+  if(submitBtn){
+    submitBtn.dataset.submitting = "1";
+    submitBtn.disabled = true;
+    submitBtn.textContent = "⏳ অর্ডার কনফার্ম হচ্ছে...";
   }
 
+  try{
+    await saveOrderToGoogleSheet(orderData);
 
-if(
-  typeof ALBA_OFFER !== "undefined" &&
-  ALBA_OFFER.enabled &&
-  typeof albaEnsureTimeSynced === "function" &&
-  !albaTimeSynced
-){
-  const synced = await albaEnsureTimeSynced();
-
-  if(!synced){
-    alert(
-      "অফারের সময় যাচাই করা যাচ্ছে না। " +
-      "ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।"
-    );
-    return;
+    // Customer never needs to know about Google Sheets or Telegram.
+    cart = [];
+    save();
+    renderCart();
+    renderCheckout();
+    closeCheckout();
+    showOrderSuccess(order, grandTotal);
+  }catch(err){
+    console.error("Order submission failed:", err);
+    alert("অর্ডার কনফার্ম করা যায়নি। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।");
+  }finally{
+    if(submitBtn){
+      submitBtn.dataset.submitting = "0";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "🛍️ অর্ডার কনফার্ম করুন";
+    }
   }
 }
 
-  // ================================================
-  // WHATSAPP MESSAGE
-  // ================================================
-
-  let msg =
-`🛍️ AL-BARAKAH নতুন অর্ডার
-
-অর্ডার নং: ${order}
-
-নাম: ${name}
-
-মোবাইল: ${phone}
-
-ঠিকানা: ${address}
-
-ডেলিভারি এলাকা: ${areaText}
-
-পণ্য:
-${list}
-
-পণ্যের মোট দাম: ${money(subtotal)}
-${offerDiscount > 0
-  ? `অফার ছাড়: -${money(offerDiscount)}`
-  : ""}
-${offerMessage}
-
-ডেলিভারি: ${
-  d === 0
-    ? "FREE"
-    : money(d)
+function showOrderSuccess(orderNo, grandTotal, customMessage){
+  const modal = document.getElementById("orderSuccessOverlay");
+  if(!modal) return;
+  const no = document.getElementById("successOrderNo");
+  const totalEl = document.getElementById("successOrderTotal");
+  if(no) no.textContent = orderNo;
+  if(totalEl) totalEl.textContent = grandTotal > 0 ? money(grandTotal) : "গ্রহণ করা হয়েছে";
+  const desc = modal.querySelector(".order-success-card > p");
+  if(desc) desc.textContent = customMessage || "আপনার অর্ডারটি আমরা পেয়েছি। প্রয়োজন অনুযায়ী আমাদের প্রতিনিধি আপনার সাথে যোগাযোগ করবেন।";
+  modal.classList.add("show");
+  document.body.classList.add("modal-open");
 }
 
-সর্বমোট: ${money(grandTotal)}`;
-
-
-  window.open(
-    `https://wa.me/${WHATSAPP}?text=${
-      encodeURIComponent(msg)
-    }`,
-    "_blank"
-  );
-
+function closeOrderSuccess(){
+  const modal = document.getElementById("orderSuccessOverlay");
+  if(modal) modal.classList.remove("show");
+  document.body.classList.remove("modal-open");
 }
-
 
 
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeProduct();closeCart();closeCheckout()}if(currentProduct&&document.getElementById("productModal").classList.contains("show")){if(e.key==="ArrowRight")nextProductImage();if(e.key==="ArrowLeft")prevProductImage()}});
@@ -2243,16 +2124,65 @@ function closeBusinessForm(e){
   document.getElementById("businessOverlay")?.classList.remove("show");
   document.body.classList.remove("modal-open");
 }
-function submitBusinessForm(e){
+async function submitBusinessForm(e){
   e.preventDefault();
-  const name=document.getElementById("businessName").value.trim();
-  const phone=document.getElementById("businessPhone").value.trim();
-  const qty=document.getElementById("businessQty").value.trim();
-  const details=document.getElementById("businessDetails").value.trim();
+
+  const form=e.target;
+  const submitBtn=form?.querySelector('button[type="submit"]');
+  if(submitBtn?.dataset.submitting === "1") return;
+
+  const name=document.getElementById("businessName")?.value.trim() || "";
+  const phone=document.getElementById("businessPhone")?.value.trim() || "";
+  const qty=Number(document.getElementById("businessQty")?.value || 1);
+  const details=document.getElementById("businessDetails")?.value.trim() || "";
   const type=businessType==="custom"?"কাস্টম ডিজাইন":"পাইকারি অর্ডার";
-  const text=`আসসালামু আলাইকুম, আমি ${type} সম্পর্কে জানতে চাই।\n\nনাম: ${name}\nমোবাইল: ${phone}\nপরিমাণ: ${qty}\nবিস্তারিত: ${details}`;
-  window.open("https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(text),"_blank");
-  closeBusinessForm();
+  const order="ALB-SP-"+Date.now().toString().slice(-8);
+
+  if(!name || !phone || !details){
+    alert("অনুগ্রহ করে প্রয়োজনীয় তথ্যগুলো পূরণ করুন।");
+    return;
+  }
+
+  if(submitBtn){
+    submitBtn.dataset.submitting="1";
+    submitBtn.disabled=true;
+    submitBtn.textContent="⏳ অনুরোধ পাঠানো হচ্ছে...";
+  }
+
+  try{
+    await saveOrderToGoogleSheet({
+      orderNo:order,
+      orderTime:new Date().toISOString(),
+      orderType:type,
+      name,
+      phone,
+      address:"—",
+      deliveryArea:"—",
+      paymentMethod:"—",
+      weight:1,
+      quantity:qty,
+      details,
+      items:[{name:type, qty, unitPrice:0, lineTotal:0}],
+      subtotal:0,
+      offer:"",
+      offerDiscount:0,
+      delivery:0,
+      grandTotal:0,
+      source:"AL-BARAKAH Website"
+    });
+
+    closeBusinessForm();
+    showOrderSuccess(order, 0, type + " অনুরোধ সফলভাবে গ্রহণ করা হয়েছে।");
+  }catch(err){
+    console.error("Special order submission failed:",err);
+    alert("অনুরোধ পাঠানো যায়নি। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।");
+  }finally{
+    if(submitBtn){
+      submitBtn.dataset.submitting="0";
+      submitBtn.disabled=false;
+      submitBtn.textContent="📨 অনুরোধ পাঠান";
+    }
+  }
 }
 
 const yearEl=document.getElementById("year"); if(yearEl) yearEl.textContent=new Date().getFullYear();
