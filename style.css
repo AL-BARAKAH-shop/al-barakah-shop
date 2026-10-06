@@ -2132,3 +2132,49 @@ body.mobile-menu-open{
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
+
+
+/* =========================================================
+   ORDER SUCCESS — CUSTOMER-FACING CONFIRMATION
+   ========================================================= */
+.order-success-overlay{
+  display:none;
+  place-items:center;
+  padding:20px;
+  background:rgba(18,18,18,.72);
+  backdrop-filter:blur(8px);
+  z-index:80;
+}
+.order-success-overlay.show{display:grid}
+.order-success-card{
+  width:min(470px,100%);
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:28px;
+  padding:34px 28px 28px;
+  text-align:center;
+  box-shadow:0 30px 90px rgba(0,0,0,.25);
+  animation:orderSuccessIn .25s ease;
+}
+@keyframes orderSuccessIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+.success-icon{
+  width:68px;height:68px;margin:0 auto 16px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:#eef8f1;
+  color:#27864b;
+  font-size:34px;font-weight:900;
+  border:1px solid #d8efdf;
+}
+.order-success-card h2{font-size:26px;line-height:1.35;margin:9px 0 10px}
+.order-success-card p{color:#707070;font-size:14px;line-height:1.8;margin:0 auto 20px;max-width:390px}
+.success-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+.success-meta div{padding:13px 10px;border:1px solid var(--line);border-radius:14px;background:#faf9f7}
+.success-meta span{display:block;color:#888;font-size:11px;margin-bottom:4px}
+.success-meta b{font-size:14px}
+.success-note{margin:0 0 18px;padding:11px 12px;border-radius:12px;background:#f8f7f5;color:#777;font-size:11.5px;line-height:1.65}
+@media(max-width:520px){
+  .order-success-card{padding:30px 18px 20px;border-radius:22px}
+  .order-success-card h2{font-size:22px}
+  .success-meta{gap:7px}
+}
