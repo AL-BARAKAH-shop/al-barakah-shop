@@ -180,7 +180,7 @@
    <label>মোবাইল<input id="businessPhone" required inputmode="tel" placeholder="01XXXXXXXXX"></label>
    <label id="businessQtyLabel">প্রয়োজনীয় পরিমাণ<input id="businessQty" type="number" min="1" value="1" required></label>
    <label>আপনার প্রয়োজন<textarea id="businessDetails" required placeholder="আপনার ডিজাইন/অর্ডারের প্রয়োজনীয় তথ্য লিখুন..."></textarea></label>
-   <button class="btn primary full business-submit" type="submit">💬 WhatsApp-এ বিস্তারিত পাঠান</button>
+   <button class="btn primary full business-submit" type="submit">📨 অনুরোধ পাঠান</button>
   </form>
  </div>
 </div>
@@ -228,12 +228,28 @@
   <div class="delivery-note">📦 <b>ডেলিভারি চার্জ:</b> ঢাকার ভেতর ৳70 এবং ঢাকার বাইরে ৳130। ১ কেজির বেশি হলে প্রতি অতিরিক্ত কেজিতে ৳20 করে যোগ হবে।</div>
   <input id="delivery" type="hidden" value="70">
   <div id="checkoutSummary" class="summary"></div>
-  <button class="btn primary full" type="submit">📱 অর্ডার কনফার্ম করুন</button>
+  <button class="btn primary full" type="submit">🛍️ অর্ডার কনফার্ম করুন</button>
  </form>
 </div></div>
 
 
 
+
+<!-- Order success -->
+<div id="orderSuccessOverlay" class="overlay order-success-overlay" onclick="if(event.target===this)closeOrderSuccess()">
+ <div class="order-success-card" onclick="event.stopPropagation()">
+  <div class="success-icon">✓</div>
+  <span class="eyebrow">ORDER CONFIRMED</span>
+  <h2>আপনার অর্ডার সফলভাবে কনফার্ম হয়েছে!</h2>
+  <p>আপনার অর্ডারটি আমরা পেয়েছি। প্রয়োজন অনুযায়ী আমাদের প্রতিনিধি আপনার সাথে যোগাযোগ করবেন।</p>
+  <div class="success-meta">
+   <div><span>Order ID</span><b id="successOrderNo">—</b></div>
+   <div><span>সর্বমোট</span><b id="successOrderTotal">৳0</b></div>
+  </div>
+  <div class="success-note">🔒 আপনার দেওয়া তথ্য নিরাপদে অর্ডার প্রসেসিংয়ের কাজে ব্যবহার করা হবে।</div>
+  <button class="btn primary full" type="button" onclick="closeOrderSuccess()">ঠিক আছে</button>
+ </div>
+</div>
 
 <script src="script.js"></script>
 <script>
