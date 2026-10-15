@@ -196,6 +196,12 @@ const galleryImages=[
       "images/vampire-blood-attar-1.webp",
       "images/vampire-blood-attar-2.webp",
 	  
+      "images/charkul_image_1.webp",
+      "images/charkul_image_2.webp",
+      "images/charkul_image_3.webp",
+      "images/charkul_image_1.webp",
+      "images/charkul_image_2.webp",
+	  
       "images/fiber-paper-1.webp",
       "images/fiber-paper-2.webp",
       "images/fiber-paper-3.webp",
@@ -1201,6 +1207,27 @@ const products=[
     short:"রহস্যময় ও আকর্ষণীয় সুগন্ধির এক অনন্য অনুভূতি",
     desc:"নামের মতোই এর ঘ্রাণে রয়েছে এক ধরনের রহস্য, গভীরতা ও আকর্ষণ। Vampire Blood Attar মূলত মিষ্টি ও ডার্ক ফ্রুটি ঘ্রাণের সঙ্গে ফ্লোরাল এবং মস্কি নোটের সুন্দর সমন্বয়—যা সাধারণ সুগন্ধি থেকে একটু ভিন্ন ধরনের পারফিউম পছন্দ করেন তাদের জন্য দারুণ একটি পছন্দ। 🌹 ঘ্রাণের ধরন: Dark Fruity • Sweet • Floral • Musky • Mysterious. প্রথমে পাওয়া যায় মিষ্টি ও জুসি ফলের ঘ্রাণ, এরপর ধীরে ধীরে ফুটে ওঠে ফ্লোরাল নোট এবং শেষে থাকে নরম মস্কি, উষ্ণ ও গভীর একটি বেস—যা পুরো সুগন্ধিটিকে করে তোলে আরও আকর্ষণীয় ও স্মরণীয়। 💎 কার জন্য উপযুক্ত: যারা মিষ্টি, ফ্রুটি, একটু ডার্ক ও রহস্যময় ধরনের সুগন্ধি পছন্দ করেন এবং প্রচলিত আতরের বাইরে একটু আলাদা signature scent খুঁজছেন, তাদের জন্য Vampire Blood Attar হতে পারে চমৎকার একটি পছন্দ।",
     features:["৮ml কমপ্যাক্ট ও সহজে বহনযোগ্য বোতল","ডার্ক ফ্রুটি অ্যারোমা — Black Cherry, Red Berries ও Plum-এর মিষ্টি-ফ্রুটি অনুভূতি","ফ্লোরাল টাচ — Jasmine ও অন্যান্য ফুলের নরম ঘ্রাণ","মাস্কি ও উডি বেস — ঘ্রাণে যোগ করে গভীরতা ও আকর্ষণ","মিষ্টি ও উষ্ণ অনুভূতি — Vanilla, Amber বা অনুরূপ উষ্ণ নোটের কারণে ঘ্রাণটি আরও সমৃদ্ধ লাগে","নারী ও পুরুষ উভয়ের জন্য উপযোগী","Evening & Night Wear — সন্ধ্যা, রাত, পার্টি ও বিশেষ অনুষ্ঠানের জন্য বিশেষভাবে মানানসই","Concentrated Attar/Perfume Oil — অল্প পরিমাণেই ব্যবহার করা যায়; তবে স্থায়িত্ব ত্বক, আবহাওয়া ও ব্যবহারের পরিমাণের ওপর নির্ভর করে।"]
+  },
+  {
+    id:48,
+	//stock:false,
+	//trending: true,
+	isNew: true,
+    name:"Rechargeable Charcoal Table Lamp",
+    cat:"টেবিল ল্যাম্প",
+    price:2050,
+    discount:20,
+    img:"images/charkul_image_1.webp",
+    images:[
+      "images/charkul_image_1.webp",
+      "images/charkul_image_2.webp",
+      "images/charkul_image_3.webp",
+      "images/charkul_image_4.webp",
+      "images/charkul_image_5.webp"
+    ],
+    short:"ইসলামিক হ্যান্ডমেড রিচার্জেবল চার কুল টেবিল ল্যাম্প",
+    desc:"PVC পাইপ দিয়ে সম্পূর্ণ হাতে তৈরি একটি ইউনিক ও আকর্ষণীয় Rechargeable Islamic Decorative Light। সুন্দর কারুকাজের মাধ্যমে এতে “আল্লাহু-আকবার” এবং চারটি নির্বাচিত সূরা—সূরা আল-কাফিরুন, সূরা আল-ইখলাস, সূরা আল-ফালাক ও সূরা আন-নাস অর্থাৎ চার ক্বুল ফুটিয়ে তোলা হয়েছে। এতে রয়েছে 2000mAh Lithium Battery এবং আকর্ষণীয় RGB Light। সঙ্গে থাকা রিমোট কন্ট্রোলের মাধ্যমে প্রয়োজন ও পছন্দ অনুযায়ী সহজেই লাইটের কালার পরিবর্তন করার সুবিধা। চার্জিংয়ের জন্য রয়েছে Type-C Charging Port। Type-C সম্বলিত যেকোনো মোবাইল চার্জার ব্যবহার করে সহজেই চার্জ দেওয়া যাবে। একবার ফুল চার্জ করলে এটি প্রায় একটানা ৩ থেকে ৪ দিন পর্যন্ত ব্যবহার করা যাবে। ব্যাটারি ব্যাকআপ ব্যবহারের সময়, উজ্জ্বলতা ও লাইট মোডের ওপর নির্ভর করে কিছুটা কম-বেশি হতে পারে।",
+    features:["Premium PVC pipe 2mm","আকর্ষণীয় Islamic Calligraphy","Height: 7 Inches","Width: 5 Inches","Battery: 2000mAh Lithium Battery","Lighting: RGB Multi-Color Light","Remote Control: রিমোটের মাধ্যমে লাইটের কালার পরিবর্তনের সুবিধা","Charging Port: Type-C (মোবাইল চার্জার দিয়ে সহজে চার্জ করার সুবিধা)","Battery Backup: এক চার্জে প্রায় একটানা ৩ থেকে ৪ দিন পর্যন্ত ব্যবহারযোগ্য","Design: “Allahuakbar” & 4 Surahs –  (চার ক্বুল)","Suitable for: Bedroom, Living Room, Office, Islamic Decoration & Gift","হাতে তৈরি • রিচার্জেবল • RGB লাইট • রিমোট কন্ট্রোল • Type-C চার্জিং • ইউনিক ইসলামিক ডিজাইন "]
   }
 ];
 
