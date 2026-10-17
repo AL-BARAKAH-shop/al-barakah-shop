@@ -331,7 +331,7 @@
 
 
 <script>
-/* AL-BARAKAH product image zoom — isolated from existing gallery controls */
+/* AL-BARAKAH product image viewer — tap to open, double-tap to zoom in/out */
 (function () {
   function initProductImageZoom() {
     const image = document.getElementById('modalImage');
@@ -343,55 +343,75 @@
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-label', 'প্রোডাক্টের বড় ছবি');
-    overlay.innerHTML = '<button type="button" class="alba-image-zoom-close" aria-label="ছবি বন্ধ করুন">×</button><img alt="">';
+    overlay.innerHTML = '<button type="button" class="alba-image-zoom-close" aria-label="ছবি বন্ধ করুন">×</button><img alt=""><span class="alba-zoom-hint">ছবিতে ডাবল ট্যাপ করলে জুম হবে</span>';
     document.body.appendChild(overlay);
 
     const zoomImage = overlay.querySelector('img');
     const closeButton = overlay.querySelector('button');
+    let lastImageTap = 0;
+    let lastViewerTap = 0;
 
+    function toggleZoom() {
+      overlay.classList.toggle('is-zoomed');
+      zoomImage.setAttribute('aria-label', overlay.classList.contains('is-zoomed') ? 'জুম কমাতে ডাবল ট্যাপ করুন' : 'জুম করতে ডাবল ট্যাপ করুন');
+    }
     function openZoom() {
       if (!image.src) return;
       zoomImage.src = image.src;
       zoomImage.alt = image.alt || 'Product image';
       overlay.classList.add('is-open');
+      overlay.classList.remove('is-zoomed');
       document.body.style.overflow = 'hidden';
-      closeButton.focus();
     }
     function closeZoom() {
-      overlay.classList.remove('is-open');
+      overlay.classList.remove('is-open', 'is-zoomed');
       zoomImage.removeAttribute('src');
       document.body.style.overflow = '';
       image.focus?.();
     }
-
-    image.addEventListener('click', openZoom);
-    image.setAttribute('tabindex', '0');
-    image.setAttribute('aria-label', 'বড় করে দেখতে ছবিতে চাপ দিন');
-    image.addEventListener('keydown', function (event) {
-      if (event.key === 'Enter' || event.key === ' ') {
+    function detectDoubleTap(event, which) {
+      const now = Date.now();
+      const last = which === 'image' ? lastImageTap : lastViewerTap;
+      if (now - last < 330) {
         event.preventDefault();
-        openZoom();
+        event.stopPropagation();
+        if (which === 'image' && !overlay.classList.contains('is-open')) openZoom();
+        toggleZoom();
+        if (which === 'image') lastImageTap = 0; else lastViewerTap = 0;
+      } else {
+        if (which === 'image') lastImageTap = now; else lastViewerTap = now;
       }
+    }
+
+    image.addEventListener('click', function () {
+      if (!overlay.classList.contains('is-open')) openZoom();
     });
+    image.addEventListener('dblclick', function (event) {
+      event.preventDefault();
+      if (!overlay.classList.contains('is-open')) openZoom();
+      toggleZoom();
+    });
+    image.addEventListener('touchend', function (event) { detectDoubleTap(event, 'image'); }, {passive:false});
+    image.setAttribute('tabindex', '0');
+    image.setAttribute('aria-label', 'বড় করে দেখতে চাপ দিন, ডাবল ট্যাপে জুম করুন');
+    image.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openZoom(); }
+    });
+
+    zoomImage.addEventListener('dblclick', function (event) { event.preventDefault(); toggleZoom(); });
+    zoomImage.addEventListener('touchend', function (event) { detectDoubleTap(event, 'viewer'); }, {passive:false});
     closeButton.addEventListener('click', closeZoom);
-    overlay.addEventListener('click', function (event) {
-      if (event.target === overlay) closeZoom();
-    });
+    overlay.addEventListener('click', function (event) { if (event.target === overlay) closeZoom(); });
     document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape' && overlay.classList.contains('is-open')) closeZoom();
     });
-    // Keep the zoomed image in sync when the customer changes gallery images.
     const observer = new MutationObserver(function () {
-      if (overlay.classList.contains('is-open')) zoomImage.src = image.src;
+      if (overlay.classList.contains('is-open')) { zoomImage.src = image.src; overlay.classList.remove('is-zoomed'); }
     });
     observer.observe(image, { attributes: true, attributeFilter: ['src'] });
   }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initProductImageZoom);
-  } else {
-    initProductImageZoom();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initProductImageZoom);
+  else initProductImageZoom();
 })();
 </script>
 
